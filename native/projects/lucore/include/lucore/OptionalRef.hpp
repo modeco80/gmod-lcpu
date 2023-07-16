@@ -68,6 +68,6 @@ namespace lucore::detail {
 } // namespace lucore::detail
 
 namespace lucore {
-	using detail::NullRef;
-	using detail::OptionalRef;
+	using detail::NullRef;	   // NOLINT ..yes, yes they are used. why do you think they aren't.
+	using detail::OptionalRef; // NOLINT ... ditto!!!
 } // namespace lucore
