@@ -1,8 +1,13 @@
+#include <algorithm>
 #include <riscv/Bus.hpp>
 
-#include <algorithm>
-
 namespace riscv {
+
+	Bus::~Bus() {
+		// Free all devices
+		for(auto& pair : mapped_devices)
+			delete pair.second;
+	}
 
 	bool Bus::AttachDevice(AddressT baseAddress, Device* device) {
 		if(!device)
@@ -15,9 +20,7 @@ namespace riscv {
 		else if(FindDeviceForAddress(baseAddress + device->Size()))
 			return false;
 
-		//mapped_devices.push_back({ .baseAddress = baseAddress, .device = device });
 		mapped_devices[baseAddress] = device;
-
 		return true;
 	}
 
@@ -61,33 +64,18 @@ namespace riscv {
 			return opt->PokeWord(address - opt->BaseAddress(), value);
 	}
 
-	OptionalRef<Bus::Device&> Bus::FindDeviceForAddress(AddressT address) const {
-		/*
-		for(auto& device : mapped_devices) {
-			// If the requested address directly matches the base address of a device
-			// mapped into memory, then we do not even need to consider checking the layout.
-			if(device.baseAddress == address)
-				return *device.device;
-
-			// Otherwise, we *do* unfortunately have to do so.
-			if(address >= device.baseAddress &&
-			   address < device.baseAddress + device.device->Size())
-				return *device.device;
-		}*/
-
+	lucore::OptionalRef<Bus::Device&> Bus::FindDeviceForAddress(AddressT address) const {
 		auto it = std::find_if(mapped_devices.begin(), mapped_devices.end(), [&](const auto& pair) {
-			return 
-				// We can shorcut the region checking if the requested addess matches base address.
-				pair.first == address ||
-				// If it doesn't we really can't, though.
-				(address >= pair.first &&
-			   		address < pair.first + pair.second->Size());
+			return
+			// We can shorcut the region checking if the requested addess matches base address.
+			pair.first == address ||
+			// If it doesn't we really can't, though.
+			(address >= pair.first && address < pair.first + pair.second->Size());
 		});
-		
 
 		// No device was found at this address
 		if(it == mapped_devices.end())
-			return NullRef;
+			return lucore::NullRef;
 		else
 			return *it->second;
 	}

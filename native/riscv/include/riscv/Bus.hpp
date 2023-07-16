@@ -1,4 +1,5 @@
 #include <riscv/Types.hpp>
+#include <lucore/OptionalRef.hpp>
 
 #include <vector>
 #include <unordered_map>
@@ -26,8 +27,8 @@ namespace riscv {
 			/// Is this device clocked?
 			virtual bool Clocked() const { return false; }
 
-			/// This function is called during clocks to give clocked devices
-			/// the ability to update
+			/// This function is called to give clocked devices
+			/// the ability to... well, clock!
 			virtual void Clock() {}
 
 			// TODO(feat): Need to implement ability to generate interrupts
@@ -47,8 +48,12 @@ namespace riscv {
 
 		};
 
+		~Bus();
 
 		/// Attach a device to the bus.
+		///
+		/// Note that once this function is called (and the device is successfully added),
+		/// the object pointed to by [device] is owned by the Bus object, and should not be deleted.
 		///
 		/// # Returns
 		/// This function returns true if the device was able to be put on the bus.
@@ -70,21 +75,12 @@ namespace riscv {
 		void PokeWord(AddressT address, u32 value);
 	private:
 
-		OptionalRef<Device&> FindDeviceForAddress(AddressT address) const;
+		lucore::OptionalRef<Device&> FindDeviceForAddress(AddressT address) const;
 
 		CPU* attachedCpu{};
 
 		// TODO: if this ends up being a hotpath replace with robinhood unordered map
 		std::unordered_map<AddressT, Device*> mapped_devices;
-
-		// this is essentially a flat map
-		// we don't particularly need hashing :p
-		//struct AttachedDevice {
-		//	AddressT baseAddress{};
-		//	Device* device{};
-		//};
-
-		//std::vector<AttachedDevice> mapped_devices{};
 	};
 
 

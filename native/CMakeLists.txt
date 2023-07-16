@@ -3,6 +3,8 @@ project(lcpu-native
 	DESCRIPTION "Superproject for LCPU GMOD Native Module"
 )
 
+add_subdirectory(lucore)
+
 # RISC-V emulation library
 add_subdirectory(riscv)
 

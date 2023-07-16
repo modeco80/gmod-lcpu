@@ -12,4 +12,9 @@ add_library(riscv
 target_compile_features(riscv PUBLIC cxx_std_20)
 target_include_directories(riscv PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
+target_link_libraries(riscv PUBLIC
+	# lucore is a public dependency, since it is (techinically) used in public api surfaces
+	lucore::lucore
+)
+
 add_library(riscv::riscv ALIAS riscv)
