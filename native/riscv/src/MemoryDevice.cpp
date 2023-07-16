@@ -1,21 +1,17 @@
 #include <riscv/Bus.hpp>
-#include "riscv/Types.hpp"
-
 #include <span>
+
+#include "riscv/Types.hpp"
 
 namespace riscv {
 
 	namespace {
 
-
-		template<bool Rom>
+		template <bool Rom>
 		struct BasicMemoryDevice : public Bus::Device {
-			BasicMemoryDevice(usize size)
-				: memorySize(size) {
+			BasicMemoryDevice(usize size) : memorySize(size) {
 				memory = new u8[size];
-				// TODO(feat): we should have a global panic system which is hooked in
-				// so that we don't just blindly crash everything
-				assert(memory && "Out of host memory");
+				LUCORE_CHECK(memory, "Could not allocate buffer for memory device.");
 			}
 
 			virtual ~BasicMemoryDevice() {
@@ -43,7 +39,7 @@ namespace riscv {
 			}
 
 			u32 PeekWord(AddressT offset) override {
-				return  std::bit_cast<u32*>(memory)[OffsetToIndex<u32>(offset)];
+				return std::bit_cast<u32*>(memory)[OffsetToIndex<u32>(offset)];
 			}
 
 			void PokeByte(AddressT offset, u8 value) override {
@@ -70,29 +66,26 @@ namespace riscv {
 				}
 			}
 
-		private:
-
-
+		   private:
 			/// helper used for implementing stuff
-			template<class T>
+			template <class T>
 			constexpr usize OffsetToIndex(AddressT offset) {
 				return (offset % memorySize) / sizeof(T);
 			}
 
 			// remember what we were attached to via "signal"
-			Bus* attachedBus{};
-			AddressT baseAddress{};
+			Bus* attachedBus {};
+			AddressT baseAddress {};
 
-			u8* memory{};
-			usize memorySize{};
+			u8* memory {};
+			usize memorySize {};
 		};
 
 		using RamDevice = BasicMemoryDevice<false>;
 		using RomDevice = BasicMemoryDevice<true>;
 
-	}
+	} // namespace
 
+	// Bus::Device* NewRam()
 
-	//Bus::Device* NewRam()
-	
-}
+} // namespace riscv

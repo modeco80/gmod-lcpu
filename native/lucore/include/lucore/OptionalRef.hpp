@@ -6,6 +6,9 @@ namespace lucore::detail {
 
 	struct Nullref_t {};
 
+	/// Sentinel value to explicitly not populate an OptionalRef.
+	inline static Nullref_t NullRef {};
+
 	template <class T>
 	struct OptionalRef; // sfinae on non-reference types
 
@@ -35,7 +38,9 @@ namespace lucore::detail {
 		}
 
 		constexpr T& Value() const {
-			LUCORE_ASSERT(HasValue() && "Attempt to access OptionalRef without stored value!");
+			// this is a CHECK() since allowing unchecked access in release builds is probably a
+			// very very bad idea
+			LUCORE_CHECK(HasValue(), "Attempt to access OptionalRef without stored value!");
 			return *ptr;
 		}
 
@@ -60,8 +65,6 @@ namespace lucore::detail {
 		T* ptr {};
 	};
 
-	/// Sentinel value to explicitly not populate an OptionalRef.
-	inline static Nullref_t NullRef {};
 } // namespace lucore::detail
 
 namespace lucore {

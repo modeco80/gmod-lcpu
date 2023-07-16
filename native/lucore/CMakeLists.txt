@@ -5,9 +5,11 @@ project(lucore
     LANGUAGES CXX
 )
 
-add_library(lucore INTERFACE)
+add_library(lucore
+	src/Assert.cpp
+)
 
-target_compile_features(lucore INTERFACE cxx_std_20)
-target_include_directories(lucore INTERFACE ${PROJECT_SOURCE_DIR}/include)
+target_compile_features(lucore PUBLIC cxx_std_20)
+target_include_directories(lucore PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 add_library(lucore::lucore ALIAS lucore)

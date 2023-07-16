@@ -7,6 +7,7 @@ project(riscv_emu
 
 add_library(riscv
 	src/Bus.cpp
+	src/MemoryDevice.cpp
 )
 
 target_compile_features(riscv PUBLIC cxx_std_20)
