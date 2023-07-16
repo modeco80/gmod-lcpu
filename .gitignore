@@ -1,0 +1,6 @@
+build/
+lua/bin
+native/riscv/ref
+
+.cache/
+.vscode/
