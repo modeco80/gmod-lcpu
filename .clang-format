@@ -1,4 +1,4 @@
-# Clang-Format file
+# .clang-format for native code portion
 
 BasedOnStyle: Google
 

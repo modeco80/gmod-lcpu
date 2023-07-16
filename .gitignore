@@ -1,6 +1,6 @@
 build/
 lua/bin
-native/riscv/ref
+native/projects/riscv/ref
 
 .cache/
 .vscode/
