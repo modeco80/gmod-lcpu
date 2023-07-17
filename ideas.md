@@ -8,27 +8,38 @@ This is basically the working ideas for the LCPU project.
 	- RISC-V rv32ima core
 		- Would supporting more than one CPU core type be worthwhile? If so, the project is relatively setup for such workflow...
 	- Controllable paramaters (RAM size, ...)
-- Our own frambuffer screen SENT (since wiremod decided to go stupid mode and saw off the gpu)
+- Our own framebuffer screen SENT (since wiremod decided to go stupid mode and saw off the gpu)
 
-## Code upload/project workflow
+## Code upload
 
-- Upload a raw binary to execute, generated from any user tooling
+- Upload a raw binary to execute, generated from any user tooling (goes into server data folder)
 	- Yes, this means you can run Linux in GMod. No, I'm not sorry.
 	- Or even an ELF? Would require less linker hell?
 
-### Integrated simple project workflow
+## Integrated simple project workflow (WIP)
 
-### LLVM integration
+- Uses official RISC-V GCC toolchain
+	- Server operator can control root path of where they have installed it.
 
-- Use LLVM tools (clang as both assembler driver and C/C++ driver) for compilation.
-	- Prebuilt toolchain with compiler-rt can be built. (only needed since compiler-rt isn't usually built with most system clang installations.)
+- Write assembly/C/C++ code using a tiny project system (source for them would go in server data folder ?)
+	- At the root of a project, a `project.json` file exists, with something like:
+	```json
+		{
+			"project": {
+				"cCompileFlags": "-O2",
+				"cppCompileFlags": "-O2 -fno-exceptions -fno-rtti",
 
-- Write assembly/maybe C/C++ code using a tiny project system (data for them would go in server data folder ?)
+				"sources": [
+					"startup.S",
+					"main.cpp"
+				]
+
+			}
+		}
+	```
 
 - No conditional compilation
 	- All files in a project are built by that project
-
-- Diagnostic integration (by either using libclang)
 
 - Text editor used to edit project source files
 
@@ -44,7 +55,7 @@ This is basically the working ideas for the LCPU project.
 
 - Admin controled global (affects all placed LCPUs) scheduler cycle rate.
 	- Couldn't be faster than tickrate though or we might block source (and.. well, i dont think i have to explain)
-		- I decided not to go with the cpu thread stuff just because its annoying, and would require more state tracking. just ticking in lua using `ENTITY:Think` should be more than good enough (even if theres a risk of hitching source, but I don't think it's that big of a problem...)
+		- I decided not to go with the cpu thread stuff just because its annoying, and would require more state tracking. just ticking in lua using `ENT:Think` should be more than good enough (even if theres a risk of hitching source, but I don't think it's that big of a problem...)
 		- Project compilations however will definitely end up in a different thread though. Running them in the engine thread would undoubtably cause issues.
 
 ## Addon interopability
