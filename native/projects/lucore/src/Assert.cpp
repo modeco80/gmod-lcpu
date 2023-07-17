@@ -7,7 +7,7 @@
 namespace lucore {
 
 	[[noreturn]] void ExitMsg(const char* fileName, int fileLine, const char* message) {
-		Logger::The().Fatal("{}", message);
+		Logger::The().Fatal(message);
 		std::quick_exit(0xAF);
 	}
 

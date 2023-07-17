@@ -1,96 +1,95 @@
 //! Logging utilities for Lucore
 //! Using Standard C++ <format>
 
-#include <format>
+#include <chrono>
 #include <cstdint>
+#include <format>
+#include <vector>
 
 namespace lucore {
 
 	/// The Lucore logger.
 	struct Logger {
-		enum class MessageSeverity {
-			Debug,
-			Info,
-			Warning,
-			Error,
-			Fatal
-		};
+		enum class MessageSeverity { Debug, Info, Warning, Error, Fatal };
 
 		static constexpr std::string_view SeverityToString(MessageSeverity sev) {
-			const char* table[] = {
-				"Deb",
-				"Inf",
-				"Wrn",
-				"Err",
-				"Ftl"
-			};
-			return table[static_cast<std::size_t>(sev)];
+			// This must match order of Logger::MessageSeverity.
+			const char* MessageSeverityStringTable[] = { "Deb", "Inf", "Wrn", "Err", "Ftl" };
+			return MessageSeverityStringTable[static_cast<std::size_t>(sev)];
 		}
+
+		/// Message data. This is only used by logger sinks.
+		struct MessageData {
+			std::chrono::system_clock::time_point time;
+			MessageSeverity severity;
+			std::string_view format;
+			std::format_args args;
+		};
 
 		/// A sink.
 		struct Sink {
-			virtual void OutputMessage(MessageSeverity severity, std::string_view format, std::format_args args) = 0;
+			/// Output a message. This is called by the logger in Logger::VOut().
+			virtual void OutputMessage(const MessageData& data) = 0;
 		};
 
-
+		/// Get the single instance of the logger.
 		static Logger& The();
 
 		Logger() = default;
 		Logger(const Logger&) = delete;
 		Logger(Logger&&) = delete;
 
+		/// Attach a sink to the logger.
+		///
+		/// Attaching a sink will allow it to output log messages.
 		void AttachSink(Sink& sink);
 
-		MessageSeverity GetLogLevel() const {
-			return logLevel;
-		}
+		/// Get the current log level.
+		MessageSeverity GetLogLevel() const { return logLevel; }
 
-		void SetLogLevel(MessageSeverity newLogLevel) {
-			logLevel = newLogLevel;
-		}
+		/// Set the current log level.
+		void SetLogLevel(MessageSeverity newLogLevel) { logLevel = newLogLevel; }
 
-		template<class... Args>
+		template <class... Args>
 		inline void Debug(std::string_view fmt, Args... args) {
 			VOut(MessageSeverity::Debug, fmt, std::make_format_args(std::forward<Args>(args)...));
 		}
 
-		template<class... Args>
+		template <class... Args>
 		inline void Info(std::string_view fmt, Args... args) {
 			VOut(MessageSeverity::Info, fmt, std::make_format_args(std::forward<Args>(args)...));
 		}
-		
-		template<class... Args>
+
+		template <class... Args>
 		inline void Warning(std::string_view fmt, Args... args) {
 			VOut(MessageSeverity::Warning, fmt, std::make_format_args(std::forward<Args>(args)...));
 		}
 
-		template<class... Args>
+		template <class... Args>
 		inline void Error(std::string_view fmt, Args... args) {
 			VOut(MessageSeverity::Error, fmt, std::make_format_args(std::forward<Args>(args)...));
 		}
 
-		template<class... Args>
+		template <class... Args>
 		inline void Fatal(std::string_view fmt, Args... args) {
 			VOut(MessageSeverity::Fatal, fmt, std::make_format_args(std::forward<Args>(args)...));
 		}
 
-	private:
+	   private:
 		void VOut(MessageSeverity severity, std::string_view format, std::format_args args);
 
-		MessageSeverity logLevel{MessageSeverity::Info};
-
-		Sink* sinks[4];
-		std::uint8_t sinkCount;
+		MessageSeverity logLevel { MessageSeverity::Info };
+		std::vector<Sink*> sinks;
 	};
 
 	/// A logger sink implementation that prints to standard output.
 	struct StdoutSink : public Logger::Sink {
 		static StdoutSink& The();
 
-		virtual void OutputMessage(Logger::MessageSeverity severity, std::string_view format, std::format_args args) override;
+		virtual void OutputMessage(const Logger::MessageData& data) override;
 	};
 
-	/// Attach stdout to the logger.
+	/// Attach the stdout logger sink to the logger.
 	void LoggerAttachStdout();
 
-}
+} // namespace lucore
