@@ -21,8 +21,6 @@ namespace riscv {
 			// Used to allow bus devices to know when they are attached to a memory bus,
 			// and ultimately, an instance of a System
 			virtual void Attached(Bus* memoryBus, AddressT baseAddress) = 0;
-			virtual AddressT BaseAddress() const = 0; // TODO(cleanup): Make this non-virtual?
-
 
 			/// Is this device clocked?
 			virtual bool Clocked() const { return false; }
@@ -35,6 +33,9 @@ namespace riscv {
 			// from devices. This needs to be implemented to facilitate the
 			// implementation of the timer device as an actual Device implmentation
 			// instead of poorly hard-coding it into the CPU core logic.
+			//
+			// Also, default implementations of Peek* and Poke* should trap.
+
 
 			// Peek() -> reads a value from this device.
 			virtual u8 PeekByte(AddressT offset) = 0;
@@ -75,11 +76,11 @@ namespace riscv {
 		void PokeWord(AddressT address, u32 value);
 	private:
 
-		lucore::OptionalRef<Device&> FindDeviceForAddress(AddressT address) const;
+		lucore::OptionalRef<Device> FindDeviceForAddress(AddressT address) const;
 
 		CPU* attachedCpu{};
 
-		// TODO: if this ends up being a hotpath replace with robinhood unordered map
+		// TODO: if this ends up being a hotpath replace with ankerl::unordered_dense
 		std::unordered_map<AddressT, Device*> mapped_devices;
 	};
 

@@ -33,41 +33,41 @@ namespace riscv {
 
 	u8 Bus::PeekByte(AddressT address) {
 		if(auto opt = FindDeviceForAddress(address); opt)
-			return opt->PeekByte(address - opt->BaseAddress());
+			return opt->PeekByte(address);
 		return -1;
 	}
 
 	u16 Bus::PeekShort(AddressT address) {
 		if(auto opt = FindDeviceForAddress(address); opt)
-			return opt->PeekShort(address - opt->BaseAddress());
+			return opt->PeekShort(address);
 		return -1;
 	}
 
 	u32 Bus::PeekWord(AddressT address) {
 		if(auto opt = FindDeviceForAddress(address); opt)
-			return opt->PeekWord(address - opt->BaseAddress());
+			return opt->PeekWord(address);
 		return -1;
 	}
 
 	void Bus::PokeByte(AddressT address, u8 value) {
 		if(auto opt = FindDeviceForAddress(address); opt)
-			return opt->PokeByte(address - opt->BaseAddress(), value);
+			return opt->PokeByte(address, value);
 	}
 
 	void Bus::PokeShort(AddressT address, u16 value) {
 		if(auto opt = FindDeviceForAddress(address); opt)
-			return opt->PokeShort(address - opt->BaseAddress(), value);
+			return opt->PokeShort(address, value);
 	}
 
 	void Bus::PokeWord(AddressT address, u32 value) {
 		if(auto opt = FindDeviceForAddress(address); opt)
-			return opt->PokeWord(address - opt->BaseAddress(), value);
+			return opt->PokeWord(address, value);
 	}
 
-	lucore::OptionalRef<Bus::Device&> Bus::FindDeviceForAddress(AddressT address) const {
+	lucore::OptionalRef<Bus::Device> Bus::FindDeviceForAddress(AddressT address) const {
 		auto it = std::find_if(mapped_devices.begin(), mapped_devices.end(), [&](const auto& pair) {
 			return
-			// We can shorcut the region checking if the requested addess matches base address.
+			// We can shorcut region checking if the requested addess matches base address.
 			pair.first == address ||
 			// If it doesn't we really can't, though.
 			(address >= pair.first && address < pair.first + pair.second->Size());

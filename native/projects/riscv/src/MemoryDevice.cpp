@@ -1,7 +1,4 @@
 #include <riscv/Bus.hpp>
-#include <span>
-
-#include "riscv/Types.hpp"
 
 namespace riscv {
 
@@ -9,7 +6,7 @@ namespace riscv {
 
 		template <bool Rom>
 		struct BasicMemoryDevice : public Bus::Device {
-			BasicMemoryDevice(usize size) : memorySize(size) {
+			BasicMemoryDevice(usize size) : Bus::Device(), memorySize(size) {
 				memory = new u8[size];
 				LUCORE_CHECK(memory, "Could not allocate buffer for memory device.");
 			}
@@ -19,6 +16,10 @@ namespace riscv {
 					delete[] memory;
 			}
 
+			AddressT Size() const override {
+				return memorySize;
+			}
+
 			// Implementation of Device interface
 
 			void Attached(Bus* bus, AddressT base) override {
@@ -26,51 +27,41 @@ namespace riscv {
 				baseAddress = base;
 			}
 
-			AddressT BaseAddress() const override {
-				return baseAddress;
+			u8 PeekByte(AddressT address) override {
+				return memory[AddressToIndex<u8>(address)];
 			}
 
-			u8 PeekByte(AddressT offset) override {
-				return memory[offset % memorySize];
+			u16 PeekShort(AddressT address) override {
+				return std::bit_cast<u16*>(memory)[AddressToIndex<u16>(address)];
 			}
 
-			u16 PeekShort(AddressT offset) override {
-				return std::bit_cast<u16*>(memory)[OffsetToIndex<u16>(offset)];
+			u32 PeekWord(AddressT address) override {
+				return std::bit_cast<u32*>(memory)[AddressToIndex<u32>(address)];
 			}
 
-			u32 PeekWord(AddressT offset) override {
-				return std::bit_cast<u32*>(memory)[OffsetToIndex<u32>(offset)];
-			}
-
-			void PokeByte(AddressT offset, u8 value) override {
+			void PokeByte(AddressT address, u8 value) override {
 				if constexpr(!Rom) {
-					memory[offset % memorySize] = value;
-				} else {
-					// TODO: trap here
+					memory[AddressToIndex<u8>(address)] = value;
 				}
 			}
 
-			void PokeShort(AddressT offset, u16 value) override {
+			void PokeShort(AddressT address, u16 value) override {
 				if constexpr(!Rom) {
-					std::bit_cast<u16*>(memory)[OffsetToIndex<u16>(offset)] = value;
-				} else {
-					// TODO: trap here
+					std::bit_cast<u16*>(memory)[AddressToIndex<u16>(address)] = value;
 				}
 			}
 
-			void PokeWord(AddressT offset, u32 value) override {
+			void PokeWord(AddressT address, u32 value) override {
 				if constexpr(!Rom) {
-					std::bit_cast<u32*>(memory)[OffsetToIndex<u32>(offset)] = value;
-				} else {
-					// TODO: trap here
+					std::bit_cast<u32*>(memory)[AddressToIndex<u32>(address)] = value;
 				}
 			}
 
 		   private:
 			/// helper used for implementing stuff
 			template <class T>
-			constexpr usize OffsetToIndex(AddressT offset) {
-				return (offset % memorySize) / sizeof(T);
+			constexpr usize AddressToIndex(AddressT address) {
+				return ((address - baseAddress) % memorySize) / sizeof(T);
 			}
 
 			// remember what we were attached to via "signal"
@@ -86,6 +77,8 @@ namespace riscv {
 
 	} // namespace
 
-	// Bus::Device* NewRam()
+	Bus::Device* NewRam(usize size) {
+		return new RamDevice(size);
+	}
 
 } // namespace riscv

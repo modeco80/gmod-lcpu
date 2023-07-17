@@ -9,9 +9,6 @@ namespace lucore::detail {
 	/// Sentinel value to explicitly not populate an OptionalRef.
 	inline static Nullref_t NullRef {};
 
-	template <class T>
-	struct OptionalRef; // sfinae on non-reference types
-
 	/// Like std::optional<T>, but optimized specifically for references to objects.
 	///
 	/// Additionally, as a bonus, since the repressentation is so simple, this is
@@ -21,7 +18,7 @@ namespace lucore::detail {
 	/// Treat this class like [std::reference_wrapper].
 	/// Do *not* give this class invalid references.
 	template <class T>
-	struct OptionalRef<T&> {
+	struct OptionalRef {
 		constexpr OptionalRef() : ptr(nullptr) {
 		}
 
@@ -34,7 +31,7 @@ namespace lucore::detail {
 
 		// polymorphic downconstruction from another OptionalRef<U>
 		template <class U>
-		constexpr OptionalRef(const OptionalRef<U&>& other) : ptr(&other.ptr) {
+		constexpr OptionalRef(const OptionalRef<U>& other) : ptr(&other.ptr) {
 		}
 
 		constexpr T& Value() const {

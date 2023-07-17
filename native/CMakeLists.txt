@@ -4,6 +4,7 @@ project(lcpu-native
 )
 
 add_subdirectory(projects/lucore)
+add_subdirectory(projects/lucore_test)
 
 # RISC-V emulation library
 add_subdirectory(projects/riscv)
