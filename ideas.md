@@ -8,6 +8,7 @@ This is basically the working ideas for the LCPU project.
 	- RISC-V rv32ima core
 		- Would supporting more than one CPU core type be worthwhile? If so, the project is relatively setup for such workflow...
 	- Controllable paramaters (RAM size, ...)
+- Our own frambuffer screen SENT (since wiremod decided to go stupid mode and saw off the gpu)
 
 ## Code upload/project workflow
 
@@ -17,12 +18,16 @@ This is basically the working ideas for the LCPU project.
 
 ### Integrated simple project workflow
 
+### LLVM integration
+- LLVM assembler (llvm-mc) is used
+	- clang for C code? (if it's not prohibitively expensive)
+	- In all cases (as/clang), the tools will all be firewalled to the given project data directory.
+		In the case of clang, an addional path will be allowed (clang freestanding headers), but that's the only exception. 
+
+	- LLVM tools integrated into server library? Or installed in lua/bin?
+
 - Write assembly/maybe C code using a tiny project system (data for them would go in server data folder ?)
-	- LLVM assembler is used
-		- Integrated clang for C code? (if it's not prohibitively expensive)
-		- In all cases (as/clang), the tools will all be firewalled to the given project data directory.
-			In the case of clang, an addional path will be allowed (clang freestanding headers), but that's the only exception. 
-	
+
 - Text editor used to edit project source files
 
 - Some example projects?
@@ -33,9 +38,9 @@ This is basically the working ideas for the LCPU project.
 	- possibly override for "respectful" users and admins (admins probably wouldn't even count)?
 
 - Admin controlled per-user max LCPU entity count (default 8)
-	- admins can override/do not count?
+	- Admins don't count
 
-- Admin controled global (affects all placed LCPUs) scheduler timeslice.
+- Admin controled global (affects all placed LCPUs) scheduler cycle rate.
 	- Couldn't be faster than tickrate though or we might block source (and.. well, i dont think i have to explain)
 		- I decided not to go with the cpu thread stuff just because its annoying, and would require more state tracking. just ticking in lua using `ENTITY:Think` should be more than good enough (even if theres a risk of hitching source, but I don't think it's that big of a problem...)
 		- Project compilations however will definitely end up in a different thread though. Running them in the engine thread would undoubtably cause issues.
@@ -45,4 +50,3 @@ This is basically the working ideas for the LCPU project.
 - Wiremod interopability
 	- Wiremod GPIO (which uses normal wire stuff)
 	- Console Screen
-	- Wire GPU (if it's not painful to do so)?

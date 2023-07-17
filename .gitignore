@@ -4,3 +4,11 @@ native/projects/riscv/ref
 
 .cache/
 .vscode/
+
+
+# temporary
+llvm_src/
+llvm_build/
+
+# pre-'mv' filenames
+llvm-project-*/
