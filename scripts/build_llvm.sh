@@ -21,4 +21,4 @@ cmake -Wno-dev -GNinja -S /build/llvm/llvm -B /build/llvm-build/build \
 	-DLLVM_DEFAULT_TARGET_TRIPLE="riscv32-unknown-gnu"
 
 ninja -C /build/llvm-build/build -j $JOBS
-ninja -C /build/llvm-build install
+ninja -C /build/llvm-build/build install
