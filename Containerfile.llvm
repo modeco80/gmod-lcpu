@@ -1,0 +1,30 @@
+
+
+
+# the base layer.
+FROM debian:oldstable AS base
+ENV DEBIAN_FRONTEND="noninteractive"
+RUN apt-get update
+
+# base layer for building
+FROM base AS build-base
+WORKDIR /build
+ARG BUILD_DEPS="curl ca-certificates build-essential python3 cmake ninja-build pkg-config git zlib1g-dev"
+RUN apt-get install -y --no-install-recommends $BUILD_DEPS
+
+
+# This comes with the LLVM source code extracted to /build/llvm
+FROM build-base as llvm-base
+ARG LLVM_SOURCE_URL="https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.0/llvm-project-16.0.0.src.tar.xz"
+ARG LLVM_VERSION="16"
+RUN mkdir llvm && \
+	cd llvm && \
+	curl -L $LLVM_SOURCE_URL | tar --strip-components=1 -xJf -
+
+
+# This will launch the builder script. 
+# /build/llvm-bin is expected to be mounted to a host directory.
+FROM llvm-base as llvm-build
+COPY scripts/build_llvm.sh .
+ENTRYPOINT ["/bin/bash", "-xeuo", "pipefail", "-O", "globstar", "-O", "dotglob"]
+CMD [ "/build/build_llvm.sh" ]
