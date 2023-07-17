@@ -13,12 +13,13 @@ It provides:
 TODO: Steps to build the LCPU native module on Windows and Linux
 
 
-LLVM is built using a podman container (see Containerfile). The steps for replicating this build follow:
+LLVM is built using a podman container (see Containerfile). The steps for building follow (this should only need to be done once):
 
 ```
 mkdir llvm_build
 podman build -t llvm-build -f Containerfile.llvm
-podman run --rm --cpus 24 -m 32G --mount type=bind,source=$PWD/llvm_build,destination=/build/llvm-build localhost/llvm-build
+podman run --rm --mount type=bind,source=$PWD/llvm_build,destination=/build/llvm-build localhost/llvm-build
+cp -rv llvm_build/install lua/bin/llvm
 ```
 
 

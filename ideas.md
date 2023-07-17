@@ -19,14 +19,16 @@ This is basically the working ideas for the LCPU project.
 ### Integrated simple project workflow
 
 ### LLVM integration
-- LLVM assembler (llvm-mc) is used
-	- clang for C code? (if it's not prohibitively expensive)
-	- In all cases (as/clang), the tools will all be firewalled to the given project data directory.
-		In the case of clang, an addional path will be allowed (clang freestanding headers), but that's the only exception. 
 
-	- LLVM tools integrated into server library? Or installed in lua/bin?
+- Use LLVM tools (clang as both assembler driver and C/C++ driver) for compilation.
+	- Prebuilt toolchain with compiler-rt can be built. (only needed since compiler-rt isn't usually built with most system clang installations.)
 
-- Write assembly/maybe C code using a tiny project system (data for them would go in server data folder ?)
+- Write assembly/maybe C/C++ code using a tiny project system (data for them would go in server data folder ?)
+
+- No conditional compilation
+	- All files in a project are built by that project
+
+- Diagnostic integration (by either using libclang)
 
 - Text editor used to edit project source files
 
@@ -38,7 +40,7 @@ This is basically the working ideas for the LCPU project.
 	- possibly override for "respectful" users and admins (admins probably wouldn't even count)?
 
 - Admin controlled per-user max LCPU entity count (default 8)
-	- Admins don't count
+	- Admins don't count to limits
 
 - Admin controled global (affects all placed LCPUs) scheduler cycle rate.
 	- Couldn't be faster than tickrate though or we might block source (and.. well, i dont think i have to explain)
@@ -48,5 +50,5 @@ This is basically the working ideas for the LCPU project.
 ## Addon interopability
 
 - Wiremod interopability
-	- Wiremod GPIO (which uses normal wire stuff)
-	- Console Screen
+	- Wiremod GPIO peripheral (to interface with wire world)
+	- special Console Screen peripheral (interfacing specifically with it)

@@ -15,26 +15,10 @@ cmake -Wno-dev -GNinja -S /build/llvm/llvm -B /build/llvm-build/build \
 	-DCMAKE_INSTALL_PREFIX="/build/llvm-build/install" \
 	-DLLVM_INCLUDE_TESTS=OFF \
 	-DLLVM_ENABLE_PROJECTS="clang;lld" \
+	-DLLVM_ENABLE_RUNTIMES="compiler-rt" \
+	-DCOMPILER_RT_BAREMETAL_BUILD=ON \
 	-DLLVM_TARGETS_TO_BUILD="RISCV" \
-	-DLLVM_DEFAULT_TARGET_TRIPLE="riscv32-none-gnu"
+	-DLLVM_DEFAULT_TARGET_TRIPLE="riscv32-unknown-gnu"
 
 ninja -C /build/llvm-build/build -j $JOBS
 ninja -C /build/llvm-build install
-
-# Build compiler-rt with our toolchain.
-cmake -Wno-dev -GNinja -S /build/llvm/compiler-rt -B /build/llvm-build/build-compiler-rt \
-	-DCMAKE_C_COMPILER="/build/llvm-build/install/bin/clang" \
-	-DCMAKE_CXX_COMPILER="/build/llvm-build/install/bin/clang++" \
-	-DCMAKE_C_FLAGS="-target riscv32-none-gnu" \
-	-DCMAKE_CXX_FLAGS="-target riscv32-none-gnu" \
-	-DCMAKE_INSTALL_PREFIX="/build/llvm-build/install/lib/clang/${LLVM_VERSION}" \
-	-DLLVM_CONFIG_PATH="/build/llvm-build/install/bin/llvm-config" \
-	-DCOMPILER_RT_BAREMETAL_BUILD=ON \
-	-DCOMPILER_RT_BUILD_SANITIZERS=OFF \
-	-DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
-	-DCOMPILER_RT_BUILD_PROFILE=OFF \
-	-DCOMPILER_RT_BUILD_MEMPROF=OFF \
-	-DCOMPILER_RT_BUILD_ORC=OFF
-
-ninja -C /build/llvm-build/build-compiler-rt -j $JOBS
-ninja -C /build/llvm-build/build-compiler-rt install
