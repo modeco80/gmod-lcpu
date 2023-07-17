@@ -18,7 +18,7 @@ LLVM is built using a podman container (see Containerfile). The steps for replic
 ```
 mkdir llvm_build
 podman build -t llvm-build -f Containerfile.llvm
-podman run --rm --cpus 16 -m 12G --mount type=bind,source=$PWD/llvm_build,destination=/build/llvm-build localhost/llvm-build
+podman run --rm --cpus 24 -m 32G --mount type=bind,source=$PWD/llvm_build,destination=/build/llvm-build localhost/llvm-build
 ```
 
 
