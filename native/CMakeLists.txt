@@ -3,11 +3,12 @@ project(lcpu-native
 	DESCRIPTION "Superproject for LCPU GMOD Native Module"
 )
 
+# Lucore (lily utilities core)
 add_subdirectory(projects/lucore)
-add_subdirectory(projects/lucore_test)
 
-# RISC-V emulation library
+# RISC-V emulator library
 add_subdirectory(projects/riscv)
 
-# Garry's Mod bindings
+# Garry's Mod native bindings to RISC-V emulator
+# Also lua device stuff
 add_subdirectory(projects/lcpu)
