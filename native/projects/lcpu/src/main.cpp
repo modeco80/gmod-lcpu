@@ -11,7 +11,7 @@ GMOD_MODULE_OPEN() {
 
 	lucore::LogInfo("Hello Source World :) {} {}", 123.456, "This should work");
 	lucore::LogWarning("test");
-	//LUCORE_CHECK(false, "this should bring the process down");
+	LUCORE_CHECK(false, "this should bring the process down");
 	return 0;
 }
 
