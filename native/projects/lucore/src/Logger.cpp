@@ -1,3 +1,6 @@
+#include <bits/iterator_concepts.h>
+
+#include <cstddef>
 #include <iostream>
 #include <lucore/Logger.hpp>
 
@@ -35,11 +38,31 @@ namespace lucore {
 	}
 
 	void StdoutSink::OutputMessage(const Logger::MessageData& data) {
-		// This is very nasty, but required until more standard libraries support the C++23 <print>
+		// This is kinda iffy, but required until more standard libraries support the C++23 <print>
 		// header.
-		std::puts(std::format("[Lucore/{}] [{}] {}", Logger::SeverityToString(data.severity),
-							  data.time, std::vformat(data.format, data.args))
-				  .c_str());
+		struct FileOutIterator {
+			using iterator_category = std::output_iterator_tag;
+			using value_type = void;
+			using difference_type = std::ptrdiff_t;
+			using pointer = void;
+			using reference = void;
+
+			FileOutIterator(std::FILE* file) : file(file) {}
+			FileOutIterator& operator*() { return *this; }
+			FileOutIterator& operator++() { return *this; }
+			FileOutIterator& operator++(int) { return *this; }
+
+			FileOutIterator& operator=(const char& val) {
+				fputc(val, file);
+				return *this;
+			}
+
+		   private:
+			std::FILE* file;
+		};
+		std::format_to(FileOutIterator(data.severity < Logger::MessageSeverity::Error ? stdout : stderr), "[Lucore/{}] [{}] {}\n",
+					   Logger::SeverityToString(data.severity), data.time,
+					   std::vformat(data.format, data.args));
 	}
 
 	void LoggerAttachStdout() {

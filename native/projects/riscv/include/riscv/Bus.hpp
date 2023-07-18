@@ -29,12 +29,8 @@ namespace riscv {
 			/// the ability to... well, clock!
 			virtual void Clock() {}
 
-			// TODO(feat): Need to implement ability to generate interrupts
-			// from devices. This needs to be implemented to facilitate the
-			// implementation of the timer device as an actual Device implmentation
-			// instead of poorly hard-coding it into the CPU core logic.
-			//
-			// Also, default implementations of Peek* and Poke* should trap.
+			// TODO(feat): default implementations of Peek* and Poke* should exist
+			// and trap the CPU (similarly to what happens if a unmapped bus read occurs).
 
 
 			// Peek() -> reads a value from this device.
@@ -49,6 +45,7 @@ namespace riscv {
 
 		};
 
+		Bus(CPU* cpu);
 		~Bus();
 
 		/// Attach a device to the bus.
@@ -66,7 +63,6 @@ namespace riscv {
 		/// Clock all clocked devices.
 		void Clock();
 
-		// 
 		u8 PeekByte(AddressT address);
 		u16 PeekShort(AddressT address);
 		u32 PeekWord(AddressT address);

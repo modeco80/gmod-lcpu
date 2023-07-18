@@ -3,6 +3,11 @@
 
 namespace riscv {
 
+	Bus::Bus(CPU* cpu)
+		: attachedCpu(cpu) {
+
+	}
+
 	Bus::~Bus() {
 		// Free all devices
 		for(auto& pair : mapped_devices)
