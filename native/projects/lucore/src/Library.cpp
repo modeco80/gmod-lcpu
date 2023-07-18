@@ -11,7 +11,8 @@ namespace lucore {
 #ifdef _WIN32
 			return std::format("{}.dll", dllName);
 #else
-			return std::format("lib{}.so", dllName);
+			return 
+			std::format("lib{}.so", dllName);
 #endif
 		}
 	} // namespace
