@@ -31,7 +31,7 @@ namespace lucore {
 		for(auto sink : sinks)
 			sink->OutputMessage(data);
 	}
-
+#if 0
 	StdoutSink& StdoutSink::The() {
 		static StdoutSink sink;
 		return sink;
@@ -69,5 +69,6 @@ namespace lucore {
 	void LoggerAttachStdout() {
 		Logger::The().AttachSink(StdoutSink::The());
 	}
+#endif
 
 } // namespace lucore

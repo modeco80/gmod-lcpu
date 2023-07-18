@@ -8,6 +8,9 @@ project(lucore
 add_library(lucore
 	src/Assert.cpp
 	src/Logger.cpp
+
+	src/OsLibrary.cpp
+	src/Library.cpp
 )
 
 target_compile_features(lucore PUBLIC cxx_std_20)

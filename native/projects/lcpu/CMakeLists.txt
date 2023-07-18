@@ -30,6 +30,7 @@ endfunction()
 
 add_library(lcpu_native SHARED
 	src/main.cpp
+	src/SourceSink.cpp
 )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
