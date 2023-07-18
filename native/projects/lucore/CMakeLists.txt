@@ -7,7 +7,9 @@ project(lucore
 
 add_library(lucore
 	src/Assert.cpp
+
 	src/Logger.cpp
+	src/StdoutSink.cpp
 
 	src/OsLibrary.cpp
 	src/Library.cpp

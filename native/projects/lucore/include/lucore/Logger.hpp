@@ -82,18 +82,6 @@ namespace lucore {
 		std::vector<Sink*> sinks;
 	};
 
-#if 0
-	/// A logger sink implementation that prints to standard output.
-	struct StdoutSink : public Logger::Sink {
-		static StdoutSink& The();
-
-		virtual void OutputMessage(const Logger::MessageData& data) override;
-	};
-#endif
-
-	/// Attach the stdout logger sink to the logger.
-	void LoggerAttachStdout();
-
 	template <class... Args>
 	void LogInfo(std::string_view format, Args... args) {
 		Logger::The().Info(format, std::forward<Args>(args)...);
