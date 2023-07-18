@@ -11,15 +11,13 @@ namespace lucore {
 #ifdef _WIN32
 			return std::format("{}.dll", dllName);
 #else
-			return 
-			std::format("lib{}.so", dllName);
+			return std::format("lib{}.so", dllName);
 #endif
 		}
 	} // namespace
 
 	Library* Library::Open(std::string_view dllname) {
-		return new Library(
-		static_cast<void*>(detail::OsOpenLibrary(FormatLibraryName(dllname).c_str())));
+		return new Library(detail::OsOpenLibrary(FormatLibraryName(dllname).c_str()));
 	}
 
 	bool Library::Loaded(std::string_view dllname) {
@@ -28,11 +26,11 @@ namespace lucore {
 
 	Library::~Library() {
 		if(handle) {
-			detail::OsFreeLibrary(static_cast<detail::OsLibraryHandle>(handle));
+			detail::OsFreeLibrary(handle);
 		}
 	}
 
 	void* Library::SymbolImpl(const char* symbolName) {
-		return detail::OsLibrarySymbol(static_cast<detail::OsLibraryHandle>(handle), symbolName);
+		return detail::OsLibrarySymbol(handle, symbolName);
 	}
 } // namespace lucore
