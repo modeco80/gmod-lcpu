@@ -60,9 +60,10 @@ namespace lucore {
 		   private:
 			std::FILE* file;
 		};
-		std::format_to(FileOutIterator(data.severity < Logger::MessageSeverity::Error ? stdout : stderr), "[Lucore/{}] [{}] {}\n",
-					   Logger::SeverityToString(data.severity), data.time,
-					   std::vformat(data.format, data.args));
+		std::format_to(
+		FileOutIterator(data.severity < Logger::MessageSeverity::Error ? stdout : stderr),
+		"[Lucore/{}] [{}] {}\n", Logger::SeverityToString(data.severity), data.time,
+		std::vformat(data.format, data.args));
 	}
 
 	void LoggerAttachStdout() {

@@ -10,4 +10,4 @@ add_subdirectory(projects/lucore_test)
 add_subdirectory(projects/riscv)
 
 # Garry's Mod bindings
-#add_subdirectory(projects/gmsv_lcpu)
+add_subdirectory(projects/lcpu)
