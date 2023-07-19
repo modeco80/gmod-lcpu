@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string_view>
 
 namespace lucore {
@@ -5,8 +7,8 @@ namespace lucore {
 	struct Library {
 		using Handle = void*;
 
-		/// Create a new library instance.
-		static Library* Open(std::string_view dllname);
+		/// Open an already loaded library
+		static Library* OpenExisting(std::string_view dllname);
 
 		/// Query if [dllname] is loaded in the process.
 		static bool Loaded(std::string_view dllname);

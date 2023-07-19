@@ -1,3 +1,5 @@
+#pragma once
+
 #include <lucore/Logger.hpp>
 
 namespace lucore {

@@ -1,5 +1,6 @@
 //! Logging utilities for Lucore
 //! Using Standard C++ <format>
+#pragma once
 
 #include <chrono>
 #include <cstdint>

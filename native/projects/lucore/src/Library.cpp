@@ -16,8 +16,11 @@ namespace lucore {
 		}
 	} // namespace
 
-	Library* Library::Open(std::string_view dllname) {
-		return new Library(detail::OsOpenLibrary(FormatLibraryName(dllname).c_str()));
+	Library* Library::OpenExisting(std::string_view dllname) {
+		auto name = FormatLibraryName(dllname);
+		if(!detail::OsLibraryLoaded(name.c_str()))
+			return nullptr;
+		return new Library(detail::OsOpenLibrary(name.c_str()));
 	}
 
 	bool Library::Loaded(std::string_view dllname) {
