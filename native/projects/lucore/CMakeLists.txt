@@ -6,14 +6,27 @@ project(lucore
 )
 
 add_library(lucore
+	# Assertion/Check failure handling
 	src/Assert.cpp
 
+	# Logging functionality
 	src/Logger.cpp
 	src/StdoutSink.cpp
 
-	src/OsLibrary.cpp
+	# Dynamic library wrappers
 	src/Library.cpp
 )
+
+# Target-specific Lucore sources.
+if(WIN32)
+	target_sources(lucore PRIVATE
+		src/OsLibrary.win32.cpp
+	)
+elseif(UNIX)
+	target_sources(lucore PRIVATE
+		src/OsLibrary.linux.cpp
+	)
+endif()
 
 target_compile_features(lucore PUBLIC cxx_std_20)
 target_include_directories(lucore PUBLIC ${PROJECT_SOURCE_DIR}/include)

@@ -7,9 +7,10 @@ namespace lcpu {
 	struct SourceSink : public lucore::Logger::Sink {
 		static SourceSink& The();
 
-		static void Init();
+		SourceSink();
+		~SourceSink();
 
 		void OutputMessage(const lucore::Logger::MessageData& data) override;
 	};
 
-}
+} // namespace lcpu

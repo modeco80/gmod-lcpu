@@ -35,7 +35,6 @@ namespace lucore {
 		/// Get the single instance of the logger.
 		static Logger& The();
 
-		Logger() = default;
 		Logger(const Logger&) = delete;
 		Logger(Logger&&) = delete;
 
@@ -76,6 +75,7 @@ namespace lucore {
 		}
 
 	   private:
+		Logger() = default;
 		void VOut(MessageSeverity severity, std::string_view format, std::format_args args);
 
 		MessageSeverity logLevel { MessageSeverity::Info };

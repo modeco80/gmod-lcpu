@@ -1,3 +1,5 @@
+#include "OsLibrary.hpp"
+
 #include <dlfcn.h>
 
 namespace lucore::detail {

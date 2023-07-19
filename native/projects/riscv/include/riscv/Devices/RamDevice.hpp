@@ -1,17 +1,15 @@
-
 #include <riscv/Bus.hpp>
-
-#include "riscv/Types.hpp"
 
 namespace riscv::devices {
 
+	/// A block of RAM which can be used by the CPU.
 	struct RamDevice : public Bus::Device {
 		RamDevice(AddressT size);
 		virtual ~RamDevice();
 
-		AddressT Size() const override;
-
 		// Implementation of Device interface
+
+		AddressT Size() const override;
 
 		void Attached(Bus* bus, AddressT base) override;
 
@@ -24,7 +22,7 @@ namespace riscv::devices {
 		void PokeWord(AddressT address, u32 value) override;
 
 	   private:
-		/// helper used for implementing stuff
+		/// helper used for implementing Peek/Poke API
 		template <class T>
 		constexpr usize AddressToIndex(AddressT address) {
 			return ((address - baseAddress) % memorySize) / sizeof(T);

@@ -8,7 +8,6 @@ This is basically the working ideas for the LCPU project.
 	- RISC-V rv32ima core
 		- Would supporting more than one CPU core type be worthwhile? If so, the project is relatively setup for such workflow...
 	- Controllable paramaters (RAM size, ...)
-- Our own framebuffer screen SENT (since wiremod decided to go stupid mode and saw off the gpu)
 
 ## Code upload
 
@@ -63,3 +62,4 @@ This is basically the working ideas for the LCPU project.
 - Wiremod interopability
 	- Wiremod GPIO peripheral (to interface with wire world)
 	- special Console Screen peripheral (interfacing specifically with it)
+	- frambuffer peripheral which uses the Digital Screen

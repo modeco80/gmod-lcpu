@@ -3,8 +3,9 @@
 
 namespace riscv {
 
-	/** The CPU core. */
+	/// The CPU core.
 	struct CPU {
+		/// CPU core state.
 		struct State {
 			u32 gpr[32];
 			u32 pc;

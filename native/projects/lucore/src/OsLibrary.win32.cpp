@@ -1,3 +1,5 @@
+#include "OsLibrary.hpp"
+
 #define _WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -20,4 +22,4 @@ namespace lucore::detail {
 		// therefore, we have nothing to do here on Windows.
 	}
 
-}
+} // namespace lucore::detail
