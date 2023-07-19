@@ -6,7 +6,7 @@
 set -x
 
 
-cmake -Wno-dev -S native -B build -DCMAKE_BUILD_TYPE=Release
+cmake -Wno-dev -GNinja -S native -B build -DCMAKE_BUILD_TYPE=Release
 ninja -C build
 
 [[ ! -d '../../lua/bin' ]] && {
