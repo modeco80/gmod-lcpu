@@ -34,6 +34,8 @@ garrysmod/addons/lcpu$ [[ ! -d '../../lua/bin']] && mkdir -p ../../lua/bin && cp
 # Tada!
 ```
 
+On Linux you can alternatively use the `./build_module.sh` script that will do all the build and installation steps automatically.
+
 
 # Special Thanks
 
