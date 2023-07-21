@@ -12,7 +12,9 @@ namespace riscv {
 		/// Create
 		static System* WithMemory(AddressT ramSize);
 
-		void AddDevice(Bus::MmioDevice* device);
+		~System();
+
+		void AddDeviceToBus(Bus::Device* device);
 
 		/// returns false if the cpu broke execution
 		bool Step();
@@ -29,6 +31,7 @@ namespace riscv {
 		/// How many instructions will the CPU execute each step
 		u32 ipsRate;
 
+		// Most of our basic required devices.
 		CPU* cpu;
 		Bus* bus;
 		devices::RamDevice* ram;

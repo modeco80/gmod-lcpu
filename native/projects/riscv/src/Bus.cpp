@@ -1,12 +1,7 @@
 #include <algorithm>
 #include <riscv/Bus.hpp>
 
-#include "riscv/Types.hpp"
-
 namespace riscv {
-
-	Bus::Bus(CPU* cpu) : attachedCpu(cpu) {
-	}
 
 	Bus::~Bus() {
 		// Free all devices

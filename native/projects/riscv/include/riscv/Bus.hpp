@@ -92,10 +92,9 @@ namespace riscv {
 			virtual void Poke(AddressT address, u32 value) = 0;
 		};
 
-		Bus(CPU* cpu);
+		/// Bus destructor.
+		/// This frees the memory for all devices.
 		~Bus();
-
-		CPU* GetCPU() { return attachedCpu; }
 
 		/// Attach a device to the bus.
 		///
@@ -106,8 +105,8 @@ namespace riscv {
 		/// This function returns true if the device was able to be put on the bus.
 		/// This function returns false in the following error cases:
 		/// 	- [device] is a null pointer
-		///		- if [device] is a memory device (and thus reserves address space), adding it would
-		///		  end up shadowing another previously-added device.
+		///		- If [device] is a memory device (and thus reserves some address space), adding it
+		///		  to the address space would end up shadowing another previously-added device.
 		bool AttachDevice(Device* device);
 
 		/// Clock all clocked devices mapped onto the bus..
@@ -123,11 +122,6 @@ namespace riscv {
 
 	   private:
 		Bus::Device* FindDeviceForAddress(AddressT address) const;
-
-		// TODO: The CPU needs not be a separate member or be treated specially, it too can be a Bus::Device now
-		// In fact that would probably be really clean and elegant for calling Step() properly
-
-		CPU* attachedCpu {};
 
 		/// All devices attached to the bus
 		std::vector<Device*> devices;
