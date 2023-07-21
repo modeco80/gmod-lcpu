@@ -1,4 +1,5 @@
 //! OptionalRef - std::optional<T&> for C++20
+#pragma once
 
 #include <lucore/Assert.hpp>
 

@@ -4,7 +4,7 @@
 
 namespace riscv::devices {
 
-	RamDevice::RamDevice(AddressT size) : Bus::Device(), memorySize(size) {
+	RamDevice::RamDevice(AddressT base, AddressT size) : memoryBase(base), memorySize(size) {
 		memory = new u8[size];
 		LUCORE_CHECK(memory, "Could not allocate buffer for memory device with size 0x{:08x}.",
 					 size);
@@ -15,15 +15,12 @@ namespace riscv::devices {
 			delete[] memory;
 	}
 
-	AddressT RamDevice::Size() const {
-		return memorySize;
+	AddressT RamDevice::Base() const {
+		return memoryBase;
 	}
 
-	// Implementation of Device interface
-
-	void RamDevice::Attached(Bus* bus, AddressT base) {
-		attachedBus = bus;
-		baseAddress = base;
+	AddressT RamDevice::Size() const {
+		return memorySize;
 	}
 
 	u8 RamDevice::PeekByte(AddressT address) {

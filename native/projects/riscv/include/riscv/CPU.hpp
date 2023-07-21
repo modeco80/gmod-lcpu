@@ -34,11 +34,18 @@ namespace riscv {
 			u32 extraflags;
 		};
 
+		CPU(Bus* bus);
+
 		State& GetState() { return state; }
+
+
+		// TODO: Handlers for CSR read/write
+
+		u32 Step(u32 elapsedMicroseconds, u32 instCount);
 
 	   private:
 		State state;
-		Bus bus;
+		Bus* bus;
 	};
 
 } // namespace riscv

@@ -7,6 +7,7 @@ project(riscv_emu
 
 add_library(riscv
 	src/Bus.cpp
+	src/CPU.cpp
 	src/Devices/RamDevice.cpp
 )
 

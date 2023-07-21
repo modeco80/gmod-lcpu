@@ -9,6 +9,8 @@ add_subdirectory(projects/lucore)
 # RISC-V emulator library
 add_subdirectory(projects/riscv)
 
+add_subdirectory(projects/riscv_test_harness)
+
 # Garry's Mod native bindings to RISC-V emulator
 # Also lua device stuff
 add_subdirectory(projects/lcpu)

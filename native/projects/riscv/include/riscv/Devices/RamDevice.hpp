@@ -3,15 +3,15 @@
 namespace riscv::devices {
 
 	/// A block of RAM which can be used by the CPU.
-	struct RamDevice : public Bus::Device {
-		RamDevice(AddressT size);
+	struct RamDevice : public Bus::MemoryDevice {
+		RamDevice(AddressT base, AddressT size);
 		virtual ~RamDevice();
 
 		// Implementation of Device interface
 
+		AddressT Base() const override;
 		AddressT Size() const override;
 
-		void Attached(Bus* bus, AddressT base) override;
 
 		u8 PeekByte(AddressT address) override;
 		u16 PeekShort(AddressT address) override;
@@ -25,12 +25,10 @@ namespace riscv::devices {
 		/// helper used for implementing Peek/Poke API
 		template <class T>
 		constexpr usize AddressToIndex(AddressT address) {
-			return ((address - baseAddress) % memorySize) / sizeof(T);
+			return ((address - memoryBase) % memorySize) / sizeof(T);
 		}
-
-		// remember what we were attached to via "signal"
-		Bus* attachedBus {};
-		AddressT baseAddress {};
+		
+		AddressT memoryBase {};
 
 		u8* memory {};
 		usize memorySize {};
