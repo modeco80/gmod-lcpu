@@ -1,14 +1,18 @@
 # LCPU
 
-LCPU is an alternative CPU core addon for GMod/Wiremod.
+LCPU is an alternative CPU core addon for Garry's Mod and Wiremod.
 
 It provides:
 
 - A standard RISC-V architechure (rv32ima) CPU core, implemented in native code
-	- No wiremod native code embargos here, so we get actually good performance without half our SENTs becoming lag machine fodder!
+	- I know, but it wouldn't particularly be very good if I managed to implement it in Lua
+		(that and the more reasons to not use Lua for a part of this codebase, the better...)
 - Interoperation with the Wiremod addon (and addons which implement Wiremod integration)
 
 This addon (for now) works with both the non-beta branch and the x86-64 beta branches of GMod.
+
+Note that the GitHub mirror is provided only for convinence, and is not used for active development. 
+See [this link](https://git.crustywindo.ws/modeco80/gmod-lcpu) for the actual development repository.
 
 # Installation
 
@@ -17,7 +21,7 @@ This repository is set up to be a Filesystem Addon; therefore, workflows which c
 Preliminary installation steps:
 
 ```
-garrysmod/addons$ git clone --recursive https://github.com/modeco80/gmod-lcpu.git lcpu
+garrysmod/addons$ git clone --recursive https://git.crustywindo.ws/modeco80/gmod-lcpu.git lcpu
 garrysmod/addons$ cd lcpu
 
 # Build the LCPU native module. These steps build the linux64 version of the module
@@ -34,9 +38,11 @@ garrysmod/addons/lcpu$ [[ ! -d '../../lua/bin']] && mkdir -p ../../lua/bin && cp
 # Tada!
 ```
 
-On Linux you can alternatively use the `./build_module.sh` script that will do all the build and installation steps automatically.
+On Linux you can alternatively use the `./build_module.sh` script that will do all the build and installation steps automatically, once cloning the repository in the garrysmod/addons folder.
+
+Windows building is currently untested; I see no reason why it wouldn't work but it is not a platform I will focus on specifically.
 
 
 # Special Thanks
 
-[CNLohr](https://github.com/CNLohr) - I may not like the mini-rv32ima code that much, but it did still help a lot (and my emulation core library is based off it, with tons of refactoring and a C++ rewrite to boot.)
+[CNLohr](https://github.com/CNLohr) - I may not like the mini-rv32ima code that much, but it did still help a lot (and my emulation core library is based off it, with tons of refactoring and a C++ rewrite to boot.), so thanks for creating the project.
