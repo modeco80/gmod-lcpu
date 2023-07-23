@@ -1,3 +1,5 @@
+#pragma once
+
 #include <riscv/Bus.hpp>
 
 namespace riscv::devices {
@@ -27,7 +29,7 @@ namespace riscv::devices {
 		constexpr usize AddressToIndex(AddressT address) {
 			return ((address - memoryBase) % memorySize) / sizeof(T);
 		}
-		
+
 		AddressT memoryBase {};
 
 		u8* memory {};

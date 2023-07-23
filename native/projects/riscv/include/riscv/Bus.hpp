@@ -16,6 +16,7 @@ namespace riscv {
 		struct Device {
 			enum class BasicType {
 				Device,		 // do not upcast.
+				Cpu,		 // upcast to CPU is safe.
 				PlainMemory, // upcast to MemoryDevice is safe.
 				Mmio		 // upcast to MmioDevice is safe.
 			};
@@ -34,16 +35,22 @@ namespace riscv {
 			/// This function is called by the bus to clock devices.
 			virtual void Clock() {}
 
+			// ability to interrupt
+
+			// probably some reset functionality later on
+
 			template <class T>
 			constexpr bool IsA() {
-				if(std::is_same_v<T, Bus::MemoryDevice*>) {
+				if constexpr (std::is_same_v<T, CPU*>) {
+					return this->Type() == BasicType::Cpu;
+				} else if constexpr (std::is_same_v<T, Bus::MemoryDevice*>) {
 					return this->Type() == BasicType::PlainMemory;
-				} else if(std::is_same_v<T, Bus::MmioDevice*>) {
+				} else if constexpr (std::is_same_v<T, Bus::MmioDevice*>) {
 					return this->Type() == BasicType::Mmio;
+				} else {
+					// Invalid types should do this.
+					return false;
 				}
-
-				// Invalid types should do this.
-				return false;
 			}
 
 			template <class T>
@@ -121,12 +128,16 @@ namespace riscv {
 		void PokeWord(AddressT address, u32 value);
 
 	   private:
+	   	// TODO: version which takes Device::BasicType
 		Bus::Device* FindDeviceForAddress(AddressT address) const;
 
-		/// All devices attached to the bus
+		CPU* cpu;
+
+		/// All plain memory or mmio devices attached to the bus
 		std::vector<Device*> devices;
 
 		// TODO: if these end up being a hotpath replace with ankerl::unordered_dense
+		// (or just use the [devices] vector, probably.)
 		std::unordered_map<AddressT, MemoryDevice*> mapped_devices;
 		std::unordered_map<AddressT, MmioDevice*> mmio_devices;
 	};

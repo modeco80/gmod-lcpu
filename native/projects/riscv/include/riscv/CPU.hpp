@@ -4,7 +4,7 @@
 namespace riscv {
 
 	/// The CPU core.
-	struct CPU {
+	struct CPU : Bus::Device {
 		/// CPU core state.
 		struct State {
 			u32 gpr[32];
@@ -12,11 +12,6 @@ namespace riscv {
 			u32 mstatus;
 			u32 cyclel;
 			u32 cycleh;
-
-			u32 timerl;
-			u32 timerh;
-			u32 timermatchl;
-			u32 timermatchh;
 
 			u32 mscratch;
 			u32 mtvec;
@@ -38,14 +33,18 @@ namespace riscv {
 
 		State& GetState() { return state; }
 
+		bool Clocked() const override { return true; } 
+		void Clock() override;
 
 		// TODO: Handlers for CSR read/write
-
-		u32 Step(u32 elapsedMicroseconds, u32 instCount);
 
 	   private:
 		State state;
 		Bus* bus;
+
+		u32 Step(u32 elapsedMicroseconds, u32 instCount);
+
+		// todo: counters for chrono/inst count.
 	};
 
 } // namespace riscv

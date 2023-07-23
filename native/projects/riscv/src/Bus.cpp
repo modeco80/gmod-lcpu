@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <riscv/Bus.hpp>
+#include <riscv/CPU.hpp>
 
 namespace riscv {
 
@@ -12,6 +13,11 @@ namespace riscv {
 	bool Bus::AttachDevice(Device* device) {
 		if(!device)
 			return false;
+
+		if(device->IsA<CPU*>()) {
+			cpu = device->Upcast<CPU*>();
+			return true;
+		}
 
 		if(device->IsA<MemoryDevice*>()) {
 			auto* upcasted = device->Upcast<MemoryDevice*>();
@@ -47,6 +53,8 @@ namespace riscv {
 			if(device->Clocked())
 				device->Clock();
 		}
+
+		cpu->Clock();
 	}
 
 	u8 Bus::PeekByte(AddressT address) {

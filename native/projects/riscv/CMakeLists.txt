@@ -8,6 +8,9 @@ project(riscv_emu
 add_library(riscv
 	src/Bus.cpp
 	src/CPU.cpp
+	src/System.cpp
+	
+	src/Devices/SysconDevice.cpp
 	src/Devices/RamDevice.cpp
 )
 
