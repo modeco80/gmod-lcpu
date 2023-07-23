@@ -30,3 +30,7 @@ struct SimpleUartDevice : public riscv::Bus::MmioDevice {
 		}
 	}
 };
+
+int main() {
+	return 0;
+}

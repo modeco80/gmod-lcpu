@@ -27,6 +27,12 @@ namespace riscv::devices {
 
 				case TIMERH_ADDRESS:
 					return timerCountHigh;
+
+				case MATCHL_ADDRESS:
+					return timerMatchLow;
+					
+				case MATCHH_ADDRESS:
+					return timerMatchHigh;
 				
 				default:
 					return 0x0;
