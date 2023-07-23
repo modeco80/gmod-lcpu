@@ -140,8 +140,6 @@ namespace riscv {
 
 	   private:
 
-		void CpuTrap(u32 trapCode);
-
 	   	// TODO: version which takes Device::BasicType
 		Bus::Device* FindDeviceForAddress(AddressT address) const;
 
