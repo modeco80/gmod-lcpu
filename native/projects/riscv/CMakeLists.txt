@@ -10,6 +10,8 @@ add_library(riscv
 	src/CPU.cpp
 	src/System.cpp
 	
+	# Basic system devices
+	src/Devices/ClntDevice.cpp
 	src/Devices/SysconDevice.cpp
 	src/Devices/RamDevice.cpp
 )

@@ -11,8 +11,7 @@ namespace riscv::devices {
 	}
 
 	RamDevice::~RamDevice() {
-		if(memory)
-			delete[] memory;
+		delete[] memory;
 	}
 
 	AddressT RamDevice::Base() const {

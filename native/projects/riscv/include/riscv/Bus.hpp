@@ -2,6 +2,7 @@
 
 #include <lucore/Assert.hpp>
 #include <riscv/Types.hpp>
+#include <riscv/CPUTypes.hpp>
 #include <unordered_map>
 #include <vector>
 
@@ -26,6 +27,10 @@ namespace riscv {
 			Device(Device&&) = delete;
 
 			virtual ~Device() = default;
+
+			virtual void Attached(Bus* bus) {
+				this->bus = bus;
+			}
 
 			virtual BasicType Type() const { return BasicType::Device; }
 
@@ -58,6 +63,9 @@ namespace riscv {
 				LUCORE_ASSERT(IsA<T>(), "Upcast failure: this is not a T");
 				return static_cast<T>(this);
 			}
+		protected:
+			/// The bus this device is attached to.
+			Bus* bus;
 		};
 
 		/// Interface plain memory bus devices use.
@@ -67,8 +75,9 @@ namespace riscv {
 			virtual BasicType Type() const override { return BasicType::PlainMemory; }
 
 			virtual AddressT Base() const = 0;
-			/// How many bytes does this device occupy of address space? This should
-			/// effectively be a constant, and should not change during CPU execution.
+			
+			/// How many bytes does this device occupy of address space? 
+			/// This should not change during execution.
 			virtual AddressT Size() const = 0;
 
 			/// Peek() -> reads a value from this device.
@@ -91,8 +100,8 @@ namespace riscv {
 
 			virtual AddressT Base() const;
 
-			/// How many bytes does this device occupy of address space? This should
-			/// effectively be a constant, and should not change during CPU execution.
+			/// How many bytes does this device occupy of address space? 
+			/// This should not change during execution.
 			virtual AddressT Size() const = 0;
 
 			virtual u32 Peek(AddressT address) = 0;
@@ -127,7 +136,12 @@ namespace riscv {
 		void PokeShort(AddressT address, u16 value);
 		void PokeWord(AddressT address, u32 value);
 
+		CPU* GetCPU() { return cpu; }
+
 	   private:
+
+		void CpuTrap(u32 trapCode);
+
 	   	// TODO: version which takes Device::BasicType
 		Bus::Device* FindDeviceForAddress(AddressT address) const;
 

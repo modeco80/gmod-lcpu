@@ -6,7 +6,7 @@ namespace riscv {
 
 	Bus::~Bus() {
 		// Free all devices
-		for(auto device: devices)
+		for(auto device : devices)
 			delete device;
 	}
 
@@ -15,6 +15,8 @@ namespace riscv {
 			return false;
 
 		if(device->IsA<CPU*>()) {
+			// Return early to avoid putting the CPU pointer inside the devices vector.
+			// We do not actually own the CPU.
 			cpu = device->Upcast<CPU*>();
 			return true;
 		}
@@ -54,47 +56,65 @@ namespace riscv {
 				device->Clock();
 		}
 
+		// The CPU is always clocked last to ensure devices can generate
+		// interrupts properly. I don't make the rules.
 		cpu->Clock();
 	}
 
 	u8 Bus::PeekByte(AddressT address) {
 		if(auto dev = FindDeviceForAddress(address); dev)
 			return dev->Upcast<MemoryDevice*>()->PeekByte(address);
-		return -1;
+		else {
+			cpu->Trap(TrapCode::LoadAccessFault);
+			return -1;
+		}
 	}
 
 	u16 Bus::PeekShort(AddressT address) {
 		if(auto dev = FindDeviceForAddress(address); dev)
 			return dev->Upcast<MemoryDevice*>()->PeekShort(address);
-		return -1;
+		else {
+			cpu->Trap(TrapCode::LoadAccessFault);
+			return -1;
+		}
 	}
 
 	u32 Bus::PeekWord(AddressT address) {
 		if(auto dev = FindDeviceForAddress(address); dev) {
-			if(dev->IsA<MmioDevice*>()) 
+			if(dev->IsA<MmioDevice*>())
 				return dev->Upcast<MmioDevice*>()->Peek(address);
 			else
 				return dev->Upcast<MemoryDevice*>()->PeekWord(address);
+		} else {
+			cpu->Trap(TrapCode::LoadAccessFault);
+			return -1;
 		}
-		return -1;
 	}
 
 	void Bus::PokeByte(AddressT address, u8 value) {
 		if(auto dev = FindDeviceForAddress(address); dev)
 			return dev->Upcast<MemoryDevice*>()->PokeByte(address, value);
+		else {
+			cpu->Trap(TrapCode::StoreAccessFault);
+		}
 	}
 
 	void Bus::PokeShort(AddressT address, u16 value) {
 		if(auto dev = FindDeviceForAddress(address); dev)
 			return dev->Upcast<MemoryDevice*>()->PokeShort(address, value);
+		else {
+			cpu->Trap(TrapCode::StoreAccessFault);
+		}
 	}
 
 	void Bus::PokeWord(AddressT address, u32 value) {
 		if(auto dev = FindDeviceForAddress(address); dev) {
-			if(dev->IsA<MmioDevice*>()) 
+			if(dev->IsA<MmioDevice*>())
 				dev->Upcast<MmioDevice*>()->Poke(address, value);
 			else
 				dev->Upcast<MemoryDevice*>()->PokeWord(address, value);
+		} else {
+			cpu->Trap(TrapCode::StoreAccessFault);
 		}
 	}
 
