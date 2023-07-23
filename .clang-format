@@ -22,7 +22,7 @@ BinPackParameters: true
 BreakConstructorInitializers: BeforeColon
 BreakStringLiterals: false
 
-ColumnLimit: 100
+ColumnLimit: 150
 CompactNamespaces: false
 
 ConstructorInitializerAllOnOneLineOrOnePerLine: true

@@ -61,7 +61,7 @@ namespace riscv {
 		cpu->Clock();
 	}
 
-	u8 Bus::PeekByte(AddressT address) {
+	u8 Bus::PeekByte(Address address) {
 		if(auto dev = FindDeviceForAddress(address); dev)
 			return dev->Upcast<MemoryDevice*>()->PeekByte(address);
 		else {
@@ -70,7 +70,7 @@ namespace riscv {
 		}
 	}
 
-	u16 Bus::PeekShort(AddressT address) {
+	u16 Bus::PeekShort(Address address) {
 		if(auto dev = FindDeviceForAddress(address); dev)
 			return dev->Upcast<MemoryDevice*>()->PeekShort(address);
 		else {
@@ -79,7 +79,7 @@ namespace riscv {
 		}
 	}
 
-	u32 Bus::PeekWord(AddressT address) {
+	u32 Bus::PeekWord(Address address) {
 		if(auto dev = FindDeviceForAddress(address); dev) {
 			if(dev->IsA<MmioDevice*>())
 				return dev->Upcast<MmioDevice*>()->Peek(address);
@@ -91,7 +91,7 @@ namespace riscv {
 		}
 	}
 
-	void Bus::PokeByte(AddressT address, u8 value) {
+	void Bus::PokeByte(Address address, u8 value) {
 		if(auto dev = FindDeviceForAddress(address); dev)
 			return dev->Upcast<MemoryDevice*>()->PokeByte(address, value);
 		else {
@@ -99,7 +99,7 @@ namespace riscv {
 		}
 	}
 
-	void Bus::PokeShort(AddressT address, u16 value) {
+	void Bus::PokeShort(Address address, u16 value) {
 		if(auto dev = FindDeviceForAddress(address); dev)
 			return dev->Upcast<MemoryDevice*>()->PokeShort(address, value);
 		else {
@@ -107,7 +107,7 @@ namespace riscv {
 		}
 	}
 
-	void Bus::PokeWord(AddressT address, u32 value) {
+	void Bus::PokeWord(Address address, u32 value) {
 		if(auto dev = FindDeviceForAddress(address); dev) {
 			if(dev->IsA<MmioDevice*>())
 				dev->Upcast<MmioDevice*>()->Poke(address, value);
@@ -118,8 +118,8 @@ namespace riscv {
 		}
 	}
 
-	Bus::Device* Bus::FindDeviceForAddress(AddressT address) const {
-		auto try_find_device = [&](auto container, AddressT address) {
+	Bus::Device* Bus::FindDeviceForAddress(Address address) const {
+		auto try_find_device = [&](auto container, Address address) {
 			return std::find_if(container.begin(), container.end(), [&](const auto& pair) {
 				return
 				// We can shorcut region checking if the requested addess matches base address.

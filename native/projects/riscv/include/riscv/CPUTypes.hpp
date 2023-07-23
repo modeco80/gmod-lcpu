@@ -3,10 +3,10 @@
 
 namespace riscv {
 
-	// Note that
+	/// Most possible trap codes.
 	enum class TrapCode : u32 {
 		InstructionAddressMisaligned,
-		InstructionAddressFault,
+		InstructionAccessFault,
 		IllegalInstruction,
 		Breakpoint, // I see what you did there ;)
 		LoadAddressMisaligned,

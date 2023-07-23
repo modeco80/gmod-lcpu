@@ -4,7 +4,7 @@
 
 namespace riscv::devices {
 
-	constexpr static AddressT MSIP_ADDRESS = ClntDevice::BASE_ADDRESS,
+	constexpr static Address MSIP_ADDRESS = ClntDevice::BASE_ADDRESS,
 							  MATCHL_ADDRESS = ClntDevice::BASE_ADDRESS + 0x4000,
 							  MATCHH_ADDRESS = ClntDevice::BASE_ADDRESS + 0x4004,
 							  TIMERL_ADDRESS = ClntDevice::BASE_ADDRESS + 0xbff8,
@@ -28,7 +28,7 @@ namespace riscv::devices {
 		}
 	}
 
-	u32 ClntDevice::Peek(AddressT address) {
+	u32 ClntDevice::Peek(Address address) {
 		switch(address) {
 			case TIMERL_ADDRESS:
 				return timerCountLow;
@@ -47,7 +47,7 @@ namespace riscv::devices {
 		}
 	}
 
-	void ClntDevice::Poke(AddressT address, u32 value) {
+	void ClntDevice::Poke(Address address, u32 value) {
 		switch(address) {
 			case MATCHL_ADDRESS:
 				timerMatchLow = value;

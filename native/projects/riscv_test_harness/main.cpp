@@ -1,19 +1,16 @@
-#include <riscv/Bus.hpp>
-#include <riscv/CPU.hpp>
-#include <riscv/Devices/RamDevice.hpp>
-
-#include "riscv/Types.hpp"
+//! A test harness for testing the riscv library.
+#include <riscv/System.hpp>
 
 /// simple 16550 UART implementation
 struct SimpleUartDevice : public riscv::Bus::MmioDevice {
-	constexpr static riscv::AddressT BASE_ADDRESS = 0x10000000;
+	constexpr static riscv::Address BASE_ADDRESS = 0x10000000;
 
-	riscv::AddressT Base() const override { return BASE_ADDRESS; }
+	riscv::Address Base() const override { return BASE_ADDRESS; }
 
-	riscv::AddressT Size() const override { return 5; }
+	riscv::Address Size() const override { return 5; }
 
 	// TODO: emulate properly
-	u32 Peek(riscv::AddressT address) override {
+	u32 Peek(riscv::Address address) override {
 		switch(address) {
 			case BASE_ADDRESS:
 				break;
@@ -24,7 +21,7 @@ struct SimpleUartDevice : public riscv::Bus::MmioDevice {
 		return 0;
 	}
 
-	void Poke(riscv::AddressT address, u32 value) override {
+	void Poke(riscv::Address address, u32 value) override {
 		if(address == BASE_ADDRESS) { // write to data buffer
 			printf("%c\n", value);
 		}
@@ -32,5 +29,7 @@ struct SimpleUartDevice : public riscv::Bus::MmioDevice {
 };
 
 int main() {
+	auto system = riscv::System::WithMemory(128 * 1024);
+	system->AddDeviceToBus(new SimpleUartDevice);
 	return 0;
 }

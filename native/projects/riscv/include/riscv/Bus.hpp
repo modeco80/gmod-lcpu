@@ -74,21 +74,21 @@ namespace riscv {
 
 			virtual BasicType Type() const override { return BasicType::PlainMemory; }
 
-			virtual AddressT Base() const = 0;
+			virtual Address Base() const = 0;
 			
 			/// How many bytes does this device occupy of address space? 
 			/// This should not change during execution.
-			virtual AddressT Size() const = 0;
+			virtual Address Size() const = 0;
 
 			/// Peek() -> reads a value from this device.
-			virtual u8 PeekByte(AddressT address) = 0;
-			virtual u16 PeekShort(AddressT address) = 0;
-			virtual u32 PeekWord(AddressT address) = 0;
+			virtual u8 PeekByte(Address address) = 0;
+			virtual u16 PeekShort(Address address) = 0;
+			virtual u32 PeekWord(Address address) = 0;
 
 			/// Poke() -> Writes a value to this device's space in memory
-			virtual void PokeByte(AddressT address, u8 value) = 0;
-			virtual void PokeShort(AddressT address, u16 value) = 0;
-			virtual void PokeWord(AddressT address, u32 value) = 0;
+			virtual void PokeByte(Address address, u8 value) = 0;
+			virtual void PokeShort(Address address, u16 value) = 0;
+			virtual void PokeWord(Address address, u32 value) = 0;
 		};
 
 		/// A device in the MMIO region.
@@ -98,14 +98,14 @@ namespace riscv {
 
 			virtual BasicType Type() const override { return BasicType::Mmio; }
 
-			virtual AddressT Base() const;
+			virtual Address Base() const = 0;
 
 			/// How many bytes does this device occupy of address space? 
 			/// This should not change during execution.
-			virtual AddressT Size() const = 0;
+			virtual Address Size() const = 0;
 
-			virtual u32 Peek(AddressT address) = 0;
-			virtual void Poke(AddressT address, u32 value) = 0;
+			virtual u32 Peek(Address address) = 0;
+			virtual void Poke(Address address, u32 value) = 0;
 		};
 
 		/// Bus destructor.
@@ -128,20 +128,20 @@ namespace riscv {
 		/// Clock all clocked devices mapped onto the bus..
 		void Clock();
 
-		u8 PeekByte(AddressT address);
-		u16 PeekShort(AddressT address);
-		u32 PeekWord(AddressT address);
+		u8 PeekByte(Address address);
+		u16 PeekShort(Address address);
+		u32 PeekWord(Address address);
 
-		void PokeByte(AddressT address, u8 value);
-		void PokeShort(AddressT address, u16 value);
-		void PokeWord(AddressT address, u32 value);
+		void PokeByte(Address address, u8 value);
+		void PokeShort(Address address, u16 value);
+		void PokeWord(Address address, u32 value);
 
 		CPU* GetCPU() { return cpu; }
 
 	   private:
 
 	   	// TODO: version which takes Device::BasicType
-		Bus::Device* FindDeviceForAddress(AddressT address) const;
+		Bus::Device* FindDeviceForAddress(Address address) const;
 
 		CPU* cpu;
 
@@ -150,8 +150,8 @@ namespace riscv {
 
 		// TODO: if these end up being a hotpath replace with ankerl::unordered_dense
 		// (or just use the [devices] vector, probably.)
-		std::unordered_map<AddressT, MemoryDevice*> mapped_devices;
-		std::unordered_map<AddressT, MmioDevice*> mmio_devices;
+		std::unordered_map<Address, MemoryDevice*> mapped_devices;
+		std::unordered_map<Address, MmioDevice*> mmio_devices;
 	};
 
 } // namespace riscv

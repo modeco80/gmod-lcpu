@@ -10,7 +10,7 @@ namespace riscv {
 	struct System {
 		/// Create a basic system with the basic periphials created.
 		/// All other periphials should be managed by the creator of this System
-		static System* WithMemory(AddressT ramSize);
+		static System* WithMemory(Address ramSize);
 
 		~System();
 

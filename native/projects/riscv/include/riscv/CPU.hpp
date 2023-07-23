@@ -9,6 +9,7 @@ namespace riscv {
 		bool Clocked() const override { return true; }
 		void Clock() override;
 
+		/// Trap the CPU. Bus devices can call this.
 		void Trap(u32 trapCode);
 		inline void Trap(TrapCode trapCode) { Trap(static_cast<u32>(trapCode)); }
 
@@ -16,6 +17,7 @@ namespace riscv {
 
 		// TODO: Handlers for CSR read/write (if we need it?)
 
+		/// CPU state
 		GeneralPurposeRegisters gpr;
 		u32 pc;
 		u32 mstatus;
@@ -38,9 +40,9 @@ namespace riscv {
 
 	   private:
 		/// Set by [CPU::Trap] to tell the CPU it was trapped.
-		/// Codes with the sign bit set are actually interrupts,
-		/// and are processed first.
 		bool trapped { false };
+
+		/// Set by [CPU::Trap] for the trap code.
 		u32 trapCode { 0 };
 
 		u32 Step(u32 instCount);

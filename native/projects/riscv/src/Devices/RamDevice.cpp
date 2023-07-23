@@ -4,7 +4,7 @@
 
 namespace riscv::devices {
 
-	RamDevice::RamDevice(AddressT base, AddressT size) : memoryBase(base), memorySize(size) {
+	RamDevice::RamDevice(Address base, Address size) : memoryBase(base), memorySize(size) {
 		memory = new u8[size];
 		LUCORE_CHECK(memory, "Could not allocate buffer for memory device with size 0x{:08x}.",
 					 size);
@@ -14,35 +14,35 @@ namespace riscv::devices {
 		delete[] memory;
 	}
 
-	AddressT RamDevice::Base() const {
+	Address RamDevice::Base() const {
 		return memoryBase;
 	}
 
-	AddressT RamDevice::Size() const {
+	Address RamDevice::Size() const {
 		return memorySize;
 	}
 
-	u8 RamDevice::PeekByte(AddressT address) {
+	u8 RamDevice::PeekByte(Address address) {
 		return memory[AddressToIndex<u8>(address)];
 	}
 
-	u16 RamDevice::PeekShort(AddressT address) {
+	u16 RamDevice::PeekShort(Address address) {
 		return std::bit_cast<u16*>(memory)[AddressToIndex<u16>(address)];
 	}
 
-	u32 RamDevice::PeekWord(AddressT address) {
+	u32 RamDevice::PeekWord(Address address) {
 		return std::bit_cast<u32*>(memory)[AddressToIndex<u32>(address)];
 	}
 
-	void RamDevice::PokeByte(AddressT address, u8 value) {
+	void RamDevice::PokeByte(Address address, u8 value) {
 		memory[AddressToIndex<u8>(address)] = value;
 	}
 
-	void RamDevice::PokeShort(AddressT address, u16 value) {
+	void RamDevice::PokeShort(Address address, u16 value) {
 		std::bit_cast<u16*>(memory)[AddressToIndex<u16>(address)] = value;
 	}
 
-	void RamDevice::PokeWord(AddressT address, u32 value) {
+	void RamDevice::PokeWord(Address address, u32 value) {
 		std::bit_cast<u32*>(memory)[AddressToIndex<u32>(address)] = value;
 	}
 
