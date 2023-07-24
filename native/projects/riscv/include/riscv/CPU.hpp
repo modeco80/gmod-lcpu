@@ -23,7 +23,7 @@ namespace riscv {
 		constexpr void Reset() {
 			// Initalize some state. We're cool like that :)
 			pc = 0x80000000;
-			gpr[10] = 0x0; // HART id
+			gpr[Gpr::A0] = 0x0; // HART id
 			extraflags |= 3; // Start in Machine mode
 		}
 
@@ -57,9 +57,7 @@ namespace riscv {
 		/// Set by [CPU::Trap] for the trap code.
 		u32 trapCode { 0 };
 
-		u32 Step(u32 instCount);
-
-		// todo: counters for chrono/inst count.
+		void Step(u32 instCount);
 	};
 
 } // namespace riscv

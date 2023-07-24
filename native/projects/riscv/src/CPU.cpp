@@ -1,17 +1,12 @@
-//! Portions of this code are copyright 2022 Charles Lohr (CNLohr).
+//! Portions of this code are copyright 2022 Charles Lohr (CNLohr),
+//! from [mini-rv32ima](https://github.com/cnlohr/mini-rv32ima).
 
 #include <riscv/Bus.hpp>
 #include <riscv/CPU.hpp>
 
-#include <lucore/Logger.hpp>
-
 namespace riscv {
 
-	// Not needed
-	//constexpr static Address RamImageOffset = 0x80000000;
-
 	void CPU::Clock() {
-		// do the thing
 		Step(1024);
 	}
 
@@ -37,14 +32,14 @@ namespace riscv {
 		// trapCode = 0x80000007;
 	}
 
-	u32 CPU::Step(u32 instCount) {
+	void CPU::Step(u32 instCount) {
 		auto interruptsInFlight = [&]() {
 			return (mip & (1 << 7) /*|| mip & (1 << 11)*/) && (mie & (1 << 7) /*|| mie & (1 << 11)*/) && (mstatus & 0x8 /*mie*/);
 		};
 
 		// Don't run if waiting for an interrupt
 		if(extraflags & 4)
-			return 1;
+			return;
 
 		u32 rdid = 0;
 		u32 rval = 0;
@@ -57,10 +52,7 @@ namespace riscv {
 				rdid = 0; // force it to gpr 0 (zero), which is not writable
 				cycle++;
 
-				//lucore::LogInfo("[CPU] pc @ 0x{:08x}", pc);
-
 				if((pc & 3)) {
-					lucore::LogWarning("[CPU] misaligned jump target.. 0x{:08x}", pc);
 					Trap(TrapCode::InstructionAddressMisaligned);
 					break;
 				} else {
@@ -74,8 +66,6 @@ namespace riscv {
 						rval = pc;
 						break;
 					}
-
-					//lucore::LogInfo("[CPU] fetch 0x{:08x} 0x{:08x}", pc, ir);
 
 					rdid = (ir >> 7) & 0x1f;
 
@@ -96,7 +86,6 @@ namespace riscv {
 							if(reladdy & 0x00100000)
 								reladdy |= 0xffe00000;
 							rval = pc + 4;
-							//lucore::LogInfo("j/al 0x{:08x}", pc + reladdy);
 							pc = pc + reladdy - 4;
 							break;
 						}
@@ -106,7 +95,6 @@ namespace riscv {
 							i32 imm_se = imm | ((imm & 0x800) ? 0xfffff000 : 0);
 							rval = pc + 4;
 							pc = ((gpr[((ir >> 15) & 0x1f)] + imm_se) & ~1) - 4;
-							//lucore::LogInfo("jalr {}, 0x{:08x}", RegName(static_cast<Gpr>(((ir >> 15) & 0x1f))), ((gpr[((ir >> 15) & 0x1f)] + imm_se) & ~1) - 4);
 							break;
 						}
 
@@ -140,12 +128,12 @@ namespace riscv {
 									break;
 
 								case 6: // BLTU
-									if((uint32_t)rs1 < (uint32_t)rs2)
+									if((u32)rs1 < (u32)rs2)
 										pc = immm4;
 									break;
 
 								case 7: // BGEU
-									if((uint32_t)rs1 >= (uint32_t)rs2)
+									if((u32)rs1 >= (u32)rs2)
 										pc = immm4;
 									break;
 								default:
@@ -183,7 +171,7 @@ namespace riscv {
 							}
 
 							if(trapped) {
-								rval = rsval;// + RamImageOffset;
+								rval = rsval; // + RamImageOffset;
 							}
 							break;
 						}
@@ -205,7 +193,7 @@ namespace riscv {
 									bus->PokeShort(addy, rs2);
 									break;
 								case 2:
-									//lucore::LogInfo("storeWord(0x{:08x}, 0x{:08x})", addy, rs2);
+									// lucore::LogInfo("storeWord(0x{:08x}, 0x{:08x})", addy, rs2);
 									bus->PokeWord(addy, rs2);
 									break;
 								default:
@@ -213,7 +201,7 @@ namespace riscv {
 							}
 
 							if(trapped) {
-								rval = addy;// + RamImageOffset;
+								rval = addy; // + RamImageOffset;
 							}
 							break;
 						}
@@ -423,7 +411,7 @@ namespace riscv {
 									mstatus |= 8;	 // Enable interrupts
 									extraflags |= 4; // Set inernal WFI bit
 									this->pc = pc + 4;
-									return 1;
+									return;
 								} else if(((csrno & 0xff) == 0x02)) { // MRET
 									// https://raw.githubusercontent.com/riscv/virtual-memory/main/specs/663-Svpbmt.pdf
 									// Table 7.6. MRET then in mstatus/mstatush sets MPV=0, MPP=0,
@@ -461,15 +449,9 @@ namespace riscv {
 							u32 rs2 = gpr[(ir >> 20) & 0x1f];
 							u32 irmid = (ir >> 27) & 0x1f;
 
-							// rs1 -= MINIRV32_RAM_IMAGE_OFFSET;
-
-							//rs1 -= RamImageOffset;
-
-							// We don't implement load/store from UART or CLNT with RV32A here.
-
 							rval = bus->PeekWord(rs1);
 							if(trapped) {
-								rval = rs1;// + RamImageOffset;
+								rval = rs1; // + RamImageOffset;
 								break;
 							}
 
@@ -528,11 +510,8 @@ namespace riscv {
 				if(trapped)
 					break;
 
-				if(rdid) {
-					//lucore::LogInfo("writing register {} -> 0x{:08x}", RegName(static_cast<Gpr>(rdid)), rval);
+				if(rdid)
 					gpr[rdid] = rval;
-				}
-
 				pc += 4;
 			}
 		}
@@ -550,13 +529,11 @@ namespace riscv {
 				else
 					mtval = pc;
 			}
-			mepc = pc; // TRICKY: The kernel advances mepc automatically.
-			// CSR( mstatus ) & 8 = MIE, & 0x80 = MPIE
-			//  On an interrupt, the system moves current MIE into MPIE
+			mepc = pc; // Interrupt handler will advance mepc
 			mstatus = (mstatus & 0x08) << 4 | ((extraflags)&3) << 11;
 			pc = (mtvec - 4);
 
-			// If trapping, always enter machine mode.
+			// Always enter machine mode when trapping.
 			extraflags |= 3;
 
 			// Reset trap flags
@@ -568,8 +545,6 @@ namespace riscv {
 		if(cyclel > cycle)
 			cycleh++;
 		cyclel = cycle;
-		pc = pc;
-		return 0;
 	}
 
 } // namespace riscv

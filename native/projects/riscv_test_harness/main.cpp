@@ -42,6 +42,7 @@ int main(int argc, char** argv) {
 	
 	// 128 KB of ram. Won't be enough to boot linux but should be good enough to test most baremetal apps
 	auto system = riscv::System::Create(128 * 1024);
+	LUCORE_CHECK(system, "could not create system for some reason.");
 
 	// Attach our UART device
 	system->bus->AttachDevice(new SimpleUartDevice);
