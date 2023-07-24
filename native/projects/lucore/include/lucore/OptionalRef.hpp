@@ -20,20 +20,16 @@ namespace lucore::detail {
 	/// Do *not* give this class invalid references.
 	template <class T>
 	struct OptionalRef {
-		constexpr OptionalRef() : ptr(nullptr) {
-		}
+		constexpr OptionalRef() : ptr(nullptr) {}
 
 		// trigger explicit null construction
-		constexpr OptionalRef(Nullref_t) : OptionalRef() {
-		}
+		constexpr OptionalRef(Nullref_t) : OptionalRef() {}
 
-		constexpr OptionalRef(T& ref) : ptr(&ref) {
-		}
+		constexpr OptionalRef(T& ref) : ptr(&ref) {}
 
 		// polymorphic downconstruction from another OptionalRef<U>
 		template <class U>
-		constexpr OptionalRef(const OptionalRef<U>& other) : ptr(&other.ptr) {
-		}
+		constexpr OptionalRef(const OptionalRef<U>& other) : ptr(&other.ptr) {}
 
 		constexpr T& Value() const {
 			// this is a CHECK() since allowing unchecked access in release builds is probably a
@@ -42,22 +38,14 @@ namespace lucore::detail {
 			return *ptr;
 		}
 
-		constexpr bool HasValue() const {
-			return ptr != nullptr;
-		}
+		constexpr bool HasValue() const { return ptr != nullptr; }
 
-		constexpr T& operator*() const {
-			return Value();
-		}
+		constexpr T& operator*() const { return Value(); }
 
 		// unchecked access: DO NOT use this without checking beforehand
-		constexpr T* operator->() const {
-			return ptr;
-		}
+		constexpr T* operator->() const { return ptr; }
 
-		constexpr operator bool() const {
-			return HasValue();
-		}
+		constexpr operator bool() const { return HasValue(); }
 
 	   private:
 		T* ptr {};

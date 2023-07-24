@@ -10,6 +10,8 @@ uint32_t strlen(const char* str) {
 	return c - str;
 }
 
+#define SYSCON *(volatile uint32_t*)0x11100000
+
 #define UART_BASE 0x10000000
 #define UART_DATA *(volatile uint32_t*)UART_BASE
 #define UART_STATUS UART_DATA
@@ -28,16 +30,16 @@ static uint32_t value = 0;
 static uint16_t shortvalue = 0;
 static uint8_t bytevalue = 0;
 
-#define COUNTER_TEST(var, max)                        \
-	for(int i = 0; i < max; ++i) {                      \
+#define COUNTER_TEST(var, max)                    \
+	for(int i = 0; i < max; ++i) {                \
 		puts(#var " is (before modification): "); \
-		putc("0123456789"[var]);                    \
-		putc('\n');                                   \
-                                                      \
-		var = i;                                    \
+		putc("0123456789"[var]);                  \
+		putc('\n');                               \
+                                                  \
+		var = i;                                  \
 		puts(#var " is (after  modification): "); \
-		putc("0123456789"[var]);                    \
-		putc('\n');                                   \
+		putc("0123456789"[var]);                  \
+		putc('\n');                               \
 	}
 
 void main() {
@@ -49,6 +51,10 @@ void main() {
 	COUNTER_TEST(bytevalue, 9);
 #endif
 
+	// Shut down the test harness once we're done testing.
+	puts("Tests done, shutting down test harness...\n");
+	SYSCON = 0x5555;
+
 	// loop forever
-	for(;;);
+	// for(;;);
 }

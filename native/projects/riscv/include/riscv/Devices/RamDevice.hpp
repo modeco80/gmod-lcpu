@@ -14,9 +14,7 @@ namespace riscv::devices {
 		Address Base() const override;
 		Address Size() const override;
 
-		u8* Raw() const {
-			return memory;
-		}
+		u8* Raw() const { return memory; }
 
 		u8 PeekByte(Address address) override;
 		u16 PeekShort(Address address) override;

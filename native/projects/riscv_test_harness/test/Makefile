@@ -7,25 +7,27 @@ PREFIX = $(TCPATH)/riscv32-unknown-elf
 CC = $(PREFIX)-gcc
 CXX = $(PREFIX)-g++
 
-CCFLAGS = -ffreestanding -fno-stack-protector
-CCFLAGS += -static -static-libgcc -fdata-sections -ffunction-sections
-CCFLAGS += -g -Os -march=rv32ima -mabi=ilp32 
-
-CXXFLAGS = $(CCFLAGS) -std=c++20 -fno-exceptions -fno-rtti
-
+ARCHFLAGS = -ffreestanding -fno-stack-protector -fdata-sections -ffunction-sections -march=rv32ima -mabi=ilp32 
+CCFLAGS = -g -Os $(ARCHFLAGS) -std=c18
+CXXFLAGS = $(ARCHFLAGS) -g -Os -std=c++20 -fno-exceptions -fno-rtti
 LDFLAGS = -T binary.ld -nostdlib -Wl,--gc-sections
 
-OBJS := start.o main.o
+OBJS = start.o \
+	main.o
 
 .PHONY: all test clean
 
 all: $(PROJECT).bin $(PROJECT).debug.txt
 
+# this assumes the lcpu project build dir you're using is 
+# [lcpu repo root]/build
 test: $(PROJECT).bin $(PROJECT).debug.txt
 	../../../../build/projects/riscv_test_harness/rvtest $<
 
 clean:
 	rm $(PROJECT).elf $(PROJECT).bin $(PROJECT).debug.txt $(OBJS)
+
+# Link rules
 
 $(PROJECT).elf: $(OBJS)
 	$(CC) $(CCFLAGS) $(LDFLAGS) -o $@ $(OBJS) 

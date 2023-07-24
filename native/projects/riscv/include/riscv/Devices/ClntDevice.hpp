@@ -12,19 +12,18 @@ namespace riscv::devices {
 		Address Base() const override { return BASE_ADDRESS; }
 		Address Size() const override { return 0xbfff; }
 
-		bool Clocked() const override { return true; } 
+		bool Clocked() const override { return true; }
 		void Clock() override;
-
 
 		u32 Peek(Address address) override;
 		void Poke(Address address, u32 value) override;
 
-	private:
+	   private:
 		u32 timerCountHigh;
 		u32 timerCountLow;
 
 		u32 timerMatchHigh;
-		u32 timerMatchLow;	
+		u32 timerMatchLow;
 	};
 
-}
+} // namespace riscv::devices

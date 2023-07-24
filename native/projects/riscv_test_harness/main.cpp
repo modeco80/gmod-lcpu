@@ -1,10 +1,9 @@
 //! A test harness for testing if the riscv library actually works.
-#include <riscv/System.hpp>
-#include <lucore/StdoutSink.hpp>
-
 #include <cstdio> // I know, I know, but this is a test program. Yell later :)
 #include <lucore/Assert.hpp>
 #include <lucore/Logger.hpp>
+#include <lucore/StdoutSink.hpp>
+#include <riscv/System.hpp>
 
 /// simple 16550 UART implementation
 struct SimpleUartDevice : public riscv::Bus::MmioDevice {
@@ -16,10 +15,8 @@ struct SimpleUartDevice : public riscv::Bus::MmioDevice {
 
 	u32 Peek(riscv::Address address) override {
 		switch(address) {
-			case BASE_ADDRESS:
-				return 0x60; // active, but no keyboard input
-			case BASE_ADDRESS + 5:
-				return '\0';
+			case BASE_ADDRESS: return 0x60; // active, but no keyboard input
+			case BASE_ADDRESS + 5: return '\0';
 		}
 
 		return 0;
@@ -28,8 +25,6 @@ struct SimpleUartDevice : public riscv::Bus::MmioDevice {
 	void Poke(riscv::Address address, u32 value) override {
 		if(address == BASE_ADDRESS) {
 			char c = value & 0x000000ff;
-			//lucore::LogInfo("[UART] got data buffer poke of char {:02x} @ pc 0x{:08x}", c, bus->GetCPU()->pc);
-			//printf("%c", c);
 			fputc(c, stderr);
 		}
 	}
@@ -39,7 +34,7 @@ int main(int argc, char** argv) {
 	lucore::LoggerAttachStdout();
 
 	LUCORE_CHECK(argc == 2, "this test harness expects one argument (the file to load into riscv memory and execute). got {} arguments", argc);
-	
+
 	// 128 KB of ram. Won't be enough to boot linux but should be good enough to test most baremetal apps
 	auto system = riscv::System::Create(128 * 1024);
 	LUCORE_CHECK(system, "could not create system for some reason.");
@@ -50,15 +45,19 @@ int main(int argc, char** argv) {
 	auto fp = std::fopen(argv[1], "rb");
 	LUCORE_CHECK(fp, "could not open file \"{}\"", argv[1]);
 
-	fseek(fp, 0, SEEK_END);
-	auto len = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
+	std::fseek(fp, 0, SEEK_END);
+	auto len = std::ftell(fp);
+	std::fseek(fp, 0, SEEK_SET);
 
-	fread(system->ram->Raw(), 1, len, fp);
-	fclose(fp);
+	std::fread(system->ram->Raw(), 1, len, fp);
+	std::fclose(fp);
 
-	// Do the thing now!
-	while(true) {
+	// This allows the host program running under the test
+	// harness to tell us to shut down.
+	bool shouldExit = false;
+	system->OnPowerOff = [&shouldExit]() { shouldExit = true; };
+
+	while(!shouldExit) {
 		system->Step();
 	}
 

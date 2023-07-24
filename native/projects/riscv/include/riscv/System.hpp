@@ -1,3 +1,4 @@
+#include <functional> // use function_ref when we get c++23?
 #include <riscv/Bus.hpp>
 #include <riscv/CPU.hpp>
 #include <riscv/Devices/ClntDevice.hpp>
@@ -16,7 +17,8 @@ namespace riscv {
 
 		void Step();
 
-		// TODO: callbacks for SYSCON PowerOff and Reboot.
+		std::function<void()> OnPowerOff;
+		std::function<void()> OnReboot;
 
 		Bus* bus;
 
@@ -27,6 +29,11 @@ namespace riscv {
 		devices::ClntDevice* clnt;
 
 	   private:
+		friend struct devices::SysconDevice;
+
+		void SysconPowerOff();
+		void SysconReboot();
+
 		System() = default;
 	};
 

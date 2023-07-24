@@ -31,8 +31,7 @@ namespace lucore {
 		};
 
 		auto it = FputcIterator(data.severity < Logger::MessageSeverity::Error ? stdout : stderr);
-		std::format_to(it, "[Lucore/{}] [{}] {}\n", Logger::SeverityToString(data.severity),
-					   data.time, std::vformat(data.format, data.args));
+		std::format_to(it, "[Lucore/{}] [{}] {}\n", Logger::SeverityToString(data.severity), data.time, std::vformat(data.format, data.args));
 	}
 
 	void LoggerAttachStdout() {

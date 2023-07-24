@@ -16,11 +16,15 @@ namespace riscv {
 		system->cpu->Reset();
 
 		// attach everything into the bus
-		if(!system->bus->AttachDevice(system->cpu)) return nullptr;
-		if(!system->bus->AttachDevice(system->clnt)) return nullptr;
-		if(!system->bus->AttachDevice(system->syscon)) return nullptr;
-		if(!system->bus->AttachDevice(system->ram)) return nullptr;
-		
+		if(!system->bus->AttachDevice(system->cpu))
+			return nullptr;
+		if(!system->bus->AttachDevice(system->clnt))
+			return nullptr;
+		if(!system->bus->AttachDevice(system->syscon))
+			return nullptr;
+		if(!system->bus->AttachDevice(system->ram))
+			return nullptr;
+
 		return system;
 	}
 
@@ -34,6 +38,17 @@ namespace riscv {
 		bus->Clock();
 
 		// Later: handling for invalid cases!
+	}
+
+	void System::SysconPowerOff() {
+		if(OnPowerOff)
+			OnPowerOff();
+	}
+
+	void System::SysconReboot() {
+		if(OnReboot)
+			OnReboot();
+		bus->GetCPU()->Reset();
 	}
 
 } // namespace riscv

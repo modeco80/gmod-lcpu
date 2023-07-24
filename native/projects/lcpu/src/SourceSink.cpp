@@ -84,8 +84,7 @@ namespace lcpu {
 
 	void SourceSink::OutputMessage(const lucore::Logger::MessageData& data) {
 		auto formatted =
-		std::format("[LCPU Native/{}] [{}] {}", lucore::Logger::SeverityToString(data.severity),
-					data.time, std::vformat(data.format, data.args));
+		std::format("[LCPU Native/{}] [{}] {}", lucore::Logger::SeverityToString(data.severity), data.time, std::vformat(data.format, data.args));
 
 		tier0::Msg("%s\n", formatted.c_str());
 	}

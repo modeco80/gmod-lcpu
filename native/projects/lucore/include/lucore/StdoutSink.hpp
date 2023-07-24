@@ -14,4 +14,4 @@ namespace lucore {
 	/// Attach the stdout logger sink to the global Lucore logger.
 	void LoggerAttachStdout();
 
-}
+} // namespace lucore

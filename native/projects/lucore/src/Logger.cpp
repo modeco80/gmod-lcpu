@@ -23,14 +23,10 @@ namespace lucore {
 		if(severity < logLevel)
 			return;
 
-		MessageData data { .time = std::chrono::system_clock::now(),
-						   .severity = severity,
-						   .format = format,
-						   .args = args };
+		MessageData data { .time = std::chrono::system_clock::now(), .severity = severity, .format = format, .args = args };
 
 		for(auto sink : sinks)
 			sink->OutputMessage(data);
 	}
-
 
 } // namespace lucore

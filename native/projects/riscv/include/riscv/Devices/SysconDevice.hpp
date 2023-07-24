@@ -2,7 +2,9 @@
 
 #include <riscv/Bus.hpp>
 
-namespace riscv { struct System; }
+namespace riscv {
+	struct System;
+}
 
 namespace riscv::devices {
 	/// RISC-V SYSCON device. This will later talk to the system to tell it things.
@@ -16,7 +18,8 @@ namespace riscv::devices {
 
 		u32 Peek(Address address) override;
 		void Poke(Address address, u32 value) override;
-	private:
+
+	   private:
 		System* system;
 	};
-}
+} // namespace riscv::devices

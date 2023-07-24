@@ -1,8 +1,8 @@
 #pragma once
 
 #include <lucore/Assert.hpp>
-#include <riscv/Types.hpp>
 #include <riscv/CPUTypes.hpp>
+#include <riscv/Types.hpp>
 #include <unordered_map>
 #include <vector>
 
@@ -28,9 +28,7 @@ namespace riscv {
 
 			virtual ~Device() = default;
 
-			virtual void Attached(Bus* bus) {
-				this->bus = bus;
-			}
+			virtual void Attached(Bus* bus) { this->bus = bus; }
 
 			virtual BasicType Type() const { return BasicType::Device; }
 
@@ -46,11 +44,11 @@ namespace riscv {
 
 			template <class T>
 			constexpr bool IsA() {
-				if constexpr (std::is_same_v<T, CPU*>) {
+				if constexpr(std::is_same_v<T, CPU*>) {
 					return this->Type() == BasicType::Cpu;
-				} else if constexpr (std::is_same_v<T, Bus::MemoryDevice*>) {
+				} else if constexpr(std::is_same_v<T, Bus::MemoryDevice*>) {
 					return this->Type() == BasicType::PlainMemory;
-				} else if constexpr (std::is_same_v<T, Bus::MmioDevice*>) {
+				} else if constexpr(std::is_same_v<T, Bus::MmioDevice*>) {
 					return this->Type() == BasicType::Mmio;
 				} else {
 					// Invalid types should do this.
@@ -63,7 +61,8 @@ namespace riscv {
 				LUCORE_ASSERT(IsA<T>(), "Upcast failure: this is not a T");
 				return static_cast<T>(this);
 			}
-		protected:
+
+		   protected:
 			/// The bus this device is attached to.
 			Bus* bus;
 		};
@@ -75,8 +74,8 @@ namespace riscv {
 			virtual BasicType Type() const override { return BasicType::PlainMemory; }
 
 			virtual Address Base() const = 0;
-			
-			/// How many bytes does this device occupy of address space? 
+
+			/// How many bytes does this device occupy of address space?
 			/// This should not change during execution.
 			virtual Address Size() const = 0;
 
@@ -100,7 +99,7 @@ namespace riscv {
 
 			virtual Address Base() const = 0;
 
-			/// How many bytes does this device occupy of address space? 
+			/// How many bytes does this device occupy of address space?
 			/// This should not change during execution.
 			virtual Address Size() const = 0;
 
@@ -139,8 +138,7 @@ namespace riscv {
 		CPU* GetCPU() { return cpu; }
 
 	   private:
-
-	   	// TODO: version which takes Device::BasicType
+		// TODO: version which takes Device::BasicType
 		Bus::Device* FindDeviceForAddress(Address address) const;
 
 		CPU* cpu;

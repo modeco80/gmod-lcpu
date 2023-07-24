@@ -16,6 +16,7 @@ AllowShortBlocksOnASingleLine: false
 AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
 
 BinPackArguments: true
 BinPackParameters: true

@@ -54,6 +54,7 @@ namespace riscv {
 
 				if((pc & 3)) {
 					Trap(TrapCode::InstructionAddressMisaligned);
+					rval = pc;
 					break;
 				} else {
 					auto ir = bus->PeekWord(pc);
@@ -136,8 +137,7 @@ namespace riscv {
 									if((u32)rs1 >= (u32)rs2)
 										pc = immm4;
 									break;
-								default:
-									Trap(TrapCode::IllegalInstruction);
+								default: Trap(TrapCode::IllegalInstruction);
 							}
 							break;
 						}
@@ -150,31 +150,20 @@ namespace riscv {
 
 							switch((ir >> 12) & 0x7) {
 								// LB, LH, LW, LBU, LHU
-								case 0:
-									rval = (i8)bus->PeekByte(rsval);
-									break;
-								case 1:
-									rval = (i16)bus->PeekShort(rsval);
-									break;
-								case 2:
-									rval = bus->PeekWord(rsval);
-									break;
-								case 4:
-									rval = bus->PeekByte(rsval);
-									break;
-								case 5:
-									rval = bus->PeekShort(rsval);
-									break;
-								default:
-									Trap(TrapCode::IllegalInstruction);
-									break;
+								case 0: rval = (i8)bus->PeekByte(rsval); break;
+								case 1: rval = (i16)bus->PeekShort(rsval); break;
+								case 2: rval = bus->PeekWord(rsval); break;
+								case 4: rval = bus->PeekByte(rsval); break;
+								case 5: rval = bus->PeekShort(rsval); break;
+								default: Trap(TrapCode::IllegalInstruction); break;
 							}
 
 							if(trapped) {
-								rval = rsval; // + RamImageOffset;
+								rval = rsval;
 							}
 							break;
 						}
+
 						case 0x23: { // store
 							u32 rs1 = gpr[(ir >> 15) & 0x1f];
 							u32 rs2 = gpr[(ir >> 20) & 0x1f];
@@ -186,22 +175,14 @@ namespace riscv {
 
 							switch((ir >> 12) & 0x7) {
 								// SB, SH, SW
-								case 0:
-									bus->PokeByte(addy, rs2);
-									break;
-								case 1:
-									bus->PokeShort(addy, rs2);
-									break;
-								case 2:
-									// lucore::LogInfo("storeWord(0x{:08x}, 0x{:08x})", addy, rs2);
-									bus->PokeWord(addy, rs2);
-									break;
-								default:
-									Trap(TrapCode::IllegalInstruction);
+								case 0: bus->PokeByte(addy, rs2); break;
+								case 1: bus->PokeShort(addy, rs2); break;
+								case 2: bus->PokeWord(addy, rs2); break;
+								default: Trap(TrapCode::IllegalInstruction);
 							}
 
 							if(trapped) {
-								rval = addy; // + RamImageOffset;
+								rval = addy;
 							}
 							break;
 						}
@@ -217,19 +198,10 @@ namespace riscv {
 							if(is_reg && (ir & 0x02000000)) {
 								switch((ir >> 12) & 7) // 0x02000000 = RV32M
 								{
-									case 0:
-										rval = rs1 * rs2;
-										break; // MUL
-
-									case 1:
-										rval = ((i64)((i32)rs1) * (i64)((i32)rs2)) >> 32;
-										break; // MULH
-									case 2:
-										rval = ((i64)((i32)rs1) * (u64)rs2) >> 32;
-										break; // MULHSU
-									case 3:
-										rval = ((u64)rs1 * (u64)rs2) >> 32;
-										break; // MULHU
+									case 0: rval = rs1 * rs2; break;								 // MUL
+									case 1: rval = ((i64)((i32)rs1) * (i64)((i32)rs2)) >> 32; break; // MULH
+									case 2: rval = ((i64)((i32)rs1) * (u64)rs2) >> 32; break;		 // MULHSU
+									case 3: rval = ((u64)rs1 * (u64)rs2) >> 32; break;				 // MULHU
 
 									case 4:
 										if(rs2 == 0)
@@ -259,30 +231,14 @@ namespace riscv {
 							} else {
 								// These could be either op-immediate or op commands.  Be careful.
 								switch((ir >> 12) & 7) {
-									case 0:
-										rval = (is_reg && (ir & 0x40000000)) ? (rs1 - rs2) : (rs1 + rs2);
-										break;
-									case 1:
-										rval = rs1 << (rs2 & 0x1F);
-										break;
-									case 2:
-										rval = (i32)rs1 < (i32)rs2;
-										break;
-									case 3:
-										rval = rs1 < rs2;
-										break;
-									case 4:
-										rval = rs1 ^ rs2;
-										break;
-									case 5:
-										rval = (ir & 0x40000000) ? (((i32)rs1) >> (rs2 & 0x1F)) : (rs1 >> (rs2 & 0x1F));
-										break;
-									case 6:
-										rval = rs1 | rs2;
-										break;
-									case 7:
-										rval = rs1 & rs2;
-										break;
+									case 0: rval = (is_reg && (ir & 0x40000000)) ? (rs1 - rs2) : (rs1 + rs2); break;
+									case 1: rval = rs1 << (rs2 & 0x1F); break;
+									case 2: rval = (i32)rs1 < (i32)rs2; break;
+									case 3: rval = rs1 < rs2; break;
+									case 4: rval = rs1 ^ rs2; break;
+									case 5: rval = (ir & 0x40000000) ? (((i32)rs1) >> (rs2 & 0x1F)) : (rs1 >> (rs2 & 0x1F)); break;
+									case 6: rval = rs1 | rs2; break;
+									case 7: rval = rs1 & rs2; break;
 								}
 							}
 							break;
@@ -305,36 +261,16 @@ namespace riscv {
 								// https://raw.githubusercontent.com/riscv/virtual-memory/main/specs/663-Svpbmt.pdf
 								// Generally, support for Zicsr
 								switch(csrno) {
-									case 0x340:
-										rval = mscratch;
-										break;
-									case 0x305:
-										rval = mtvec;
-										break;
-									case 0x304:
-										rval = mie;
-										break;
-									case 0xC00:
-										rval = cycle;
-										break;
-									case 0x344:
-										rval = mip;
-										break;
-									case 0x341:
-										rval = mepc;
-										break;
-									case 0x300:
-										rval = mstatus;
-										break; // mstatus
-									case 0x342:
-										rval = mcause;
-										break;
-									case 0x343:
-										rval = mtval;
-										break;
-									case 0xf11:
-										rval = 0xff0ff0ff;
-										break; // mvendorid
+									case 0x340: rval = mscratch; break;
+									case 0x305: rval = mtvec; break;
+									case 0x304: rval = mie; break;
+									case 0xC00: rval = cycle; break;
+									case 0x344: rval = mip; break;
+									case 0x341: rval = mepc; break;
+									case 0x300: rval = mstatus; break; // mstatus
+									case 0x342: rval = mcause; break;
+									case 0x343: rval = mtval; break;
+									case 0xf11: rval = 0xff0ff0ff; break; // mvendorid
 									case 0x301:
 										rval = 0x40401101;
 										break; // misa (XLEN=32, IMA+X)
@@ -349,51 +285,23 @@ namespace riscv {
 								}
 
 								switch(microop) {
-									case 1:
-										writeval = rs1;
-										break; // CSRRW
-									case 2:
-										writeval = rval | rs1;
-										break; // CSRRS
-									case 3:
-										writeval = rval & ~rs1;
-										break; // CSRRC
-									case 5:
-										writeval = rs1imm;
-										break; // CSRRWI
-									case 6:
-										writeval = rval | rs1imm;
-										break; // CSRRSI
-									case 7:
-										writeval = rval & ~rs1imm;
-										break; // CSRRCI
+									case 1: writeval = rs1; break;			  // CSRRW
+									case 2: writeval = rval | rs1; break;	  // CSRRS
+									case 3: writeval = rval & ~rs1; break;	  // CSRRC
+									case 5: writeval = rs1imm; break;		  // CSRRWI
+									case 6: writeval = rval | rs1imm; break;  // CSRRSI
+									case 7: writeval = rval & ~rs1imm; break; // CSRRCI
 								}
 
 								switch(csrno) {
-									case 0x340:
-										mscratch = writeval;
-										break;
-									case 0x305:
-										mtvec = writeval;
-										break;
-									case 0x304:
-										mie = writeval;
-										break;
-									case 0x344:
-										mip = writeval;
-										break;
-									case 0x341:
-										mepc = writeval;
-										break;
-									case 0x300:
-										mstatus = writeval;
-										break; // mstatus
-									case 0x342:
-										mcause = writeval;
-										break;
-									case 0x343:
-										mtval = writeval;
-										break;
+									case 0x340: mscratch = writeval; break;
+									case 0x305: mtvec = writeval; break;
+									case 0x304: mie = writeval; break;
+									case 0x344: mip = writeval; break;
+									case 0x341: mepc = writeval; break;
+									case 0x300: mstatus = writeval; break; // mstatus
+									case 0x342: mcause = writeval; break;
+									case 0x343: mtval = writeval; break;
 									// case 0x3a0: break; //pmpcfg0
 									// case 0x3B0: break; //pmpaddr0
 									// case 0xf11: break; //mvendorid
@@ -434,15 +342,14 @@ namespace riscv {
 										case 1: // breakpoint
 											Trap(TrapCode::Breakpoint);
 											break;
-										default:
-											Trap(TrapCode::IllegalInstruction);
-											break;
+										default: Trap(TrapCode::IllegalInstruction); break;
 									}
 								}
 							} else
 								Trap(TrapCode::IllegalInstruction);
 							break;
 						}
+
 						case 0x2f: // RV32A (0b00101111)
 						{
 							u32 rs1 = gpr[(ir >> 15) & 0x1f];
@@ -451,7 +358,7 @@ namespace riscv {
 
 							rval = bus->PeekWord(rs1);
 							if(trapped) {
-								rval = rs1; // + RamImageOffset;
+								rval = rs1;
 								break;
 							}
 
@@ -466,32 +373,15 @@ namespace riscv {
 									rval = (extraflags >> 3 != (rs1 & 0x1fffffff)); // Validate that our reservation slot is OK.
 									dowrite = !rval;								// Only write if slot is valid.
 									break;
-								case 1:
-									break; // AMOSWAP.W (0b00001)
-								case 0:
-									rs2 += rval;
-									break; // AMOADD.W (0b00000)
-								case 4:
-									rs2 ^= rval;
-									break; // AMOXOR.W (0b00100)
-								case 12:
-									rs2 &= rval;
-									break; // AMOAND.W (0b01100)
-								case 8:
-									rs2 |= rval;
-									break; // AMOOR.W (0b01000)
-								case 16:
-									rs2 = ((i32)rs2 < (i32)rval) ? rs2 : rval;
-									break; // AMOMIN.W (0b10000)
-								case 20:
-									rs2 = ((i32)rs2 > (i32)rval) ? rs2 : rval;
-									break; // AMOMAX.W (0b10100)
-								case 24:
-									rs2 = (rs2 < rval) ? rs2 : rval;
-									break; // AMOMINU.W (0b11000)
-								case 28:
-									rs2 = (rs2 > rval) ? rs2 : rval;
-									break; // AMOMAXU.W (0b11100)
+								case 1: break;											   // AMOSWAP.W (0b00001)
+								case 0: rs2 += rval; break;								   // AMOADD.W (0b00000)
+								case 4: rs2 ^= rval; break;								   // AMOXOR.W (0b00100)
+								case 12: rs2 &= rval; break;							   // AMOAND.W (0b01100)
+								case 8: rs2 |= rval; break;								   // AMOOR.W (0b01000)
+								case 16: rs2 = ((i32)rs2 < (i32)rval) ? rs2 : rval; break; // AMOMIN.W (0b10000)
+								case 20: rs2 = ((i32)rs2 > (i32)rval) ? rs2 : rval; break; // AMOMAX.W (0b10100)
+								case 24: rs2 = (rs2 < rval) ? rs2 : rval; break;		   // AMOMINU.W (0b11000)
+								case 28: rs2 = (rs2 > rval) ? rs2 : rval; break;		   // AMOMAXU.W (0b11100)
 								default:
 									Trap(TrapCode::IllegalInstruction);
 									dowrite = 0;
@@ -501,8 +391,7 @@ namespace riscv {
 								bus->PokeWord(rs1, rs2);
 							break;
 						}
-						default:
-							Trap(TrapCode::IllegalInstruction);
+						default: Trap(TrapCode::IllegalInstruction);
 					}
 				}
 

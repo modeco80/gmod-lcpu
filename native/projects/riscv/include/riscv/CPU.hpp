@@ -6,7 +6,7 @@ namespace riscv {
 
 	/// The CPU core.
 	struct CPU : Bus::Device {
-		BasicType Type() const override { return BasicType::Cpu; } 
+		BasicType Type() const override { return BasicType::Cpu; }
 		bool Clocked() const override { return true; }
 		void Clock() override;
 
@@ -16,14 +16,11 @@ namespace riscv {
 
 		void TimerInterrupt();
 
-		constexpr CPU() {
-			Reset();
-		}
+		constexpr CPU() { Reset(); }
 
 		constexpr void Reset() {
 			// Initalize some state. We're cool like that :)
 			pc = 0x80000000;
-			gpr[Gpr::A0] = 0x0; // HART id
 			extraflags |= 3; // Start in Machine mode
 		}
 
