@@ -14,6 +14,8 @@ namespace riscv {
 		if(!device)
 			return false;
 
+		device->Attached(this);
+
 		if(device->IsA<CPU*>()) {
 			// Return early to avoid putting the CPU pointer inside the devices vector.
 			// We do not actually own the CPU.
@@ -119,7 +121,7 @@ namespace riscv {
 	}
 
 	Bus::Device* Bus::FindDeviceForAddress(Address address) const {
-		auto try_find_device = [&](auto container, Address address) {
+		auto try_find_device = [&](const auto& container, Address address) {
 			return std::find_if(container.begin(), container.end(), [&](const auto& pair) {
 				return
 				// We can shorcut region checking if the requested addess matches base address.

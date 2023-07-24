@@ -6,6 +6,7 @@ namespace riscv {
 
 	/// The CPU core.
 	struct CPU : Bus::Device {
+		BasicType Type() const override { return BasicType::Cpu; } 
 		bool Clocked() const override { return true; }
 		void Clock() override;
 
@@ -14,6 +15,17 @@ namespace riscv {
 		inline void Trap(TrapCode trapCode) { Trap(static_cast<u32>(trapCode)); }
 
 		void TimerInterrupt();
+
+		constexpr CPU() {
+			Reset();
+		}
+
+		constexpr void Reset() {
+			// Initalize some state. We're cool like that :)
+			pc = 0x80000000;
+			gpr[10] = 0x0; // HART id
+			extraflags |= 3; // Start in Machine mode
+		}
 
 		// TODO: Handlers for CSR read/write (if we need it?)
 

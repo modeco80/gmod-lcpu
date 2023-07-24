@@ -3,11 +3,12 @@
 #include <riscv/Bus.hpp>
 #include <riscv/CPU.hpp>
 
-#include "riscv/CPUTypes.hpp"
+#include <lucore/Logger.hpp>
 
 namespace riscv {
 
-	constexpr static Address RamImageOffset = 0x80000000;
+	// Not needed
+	//constexpr static Address RamImageOffset = 0x80000000;
 
 	void CPU::Clock() {
 		// do the thing
@@ -47,30 +48,34 @@ namespace riscv {
 
 		u32 rdid = 0;
 		u32 rval = 0;
-		u32 pc = this->pc;
 		u32 cycle = this->cyclel;
 
 		if(interruptsInFlight()) {
 			Trap(0x80000007);
 		} else {
 			for(u32 iInst = 0; iInst < instCount; ++iInst) {
-				auto ofs_pc = pc - RamImageOffset;
+				rdid = 0; // force it to gpr 0 (zero), which is not writable
 				cycle++;
 
-				if(ofs_pc & 3) {
+				//lucore::LogInfo("[CPU] pc @ 0x{:08x}", pc);
+
+				if((pc & 3)) {
+					lucore::LogWarning("[CPU] misaligned jump target.. 0x{:08x}", pc);
 					Trap(TrapCode::InstructionAddressMisaligned);
 					break;
 				} else {
-					auto ir = bus->PeekWord(ofs_pc);
+					auto ir = bus->PeekWord(pc);
 					if(trapped) {
 						// Overwrite the trap that the bus generated. This might not really work out
 						// in practice but should at least kind-of replicate behaviour (our address
 						// space is emulated using the [Bus] class, so there is no heap write issue
 						// that could be caused by leaving it unbound).
 						Trap(TrapCode::InstructionAccessFault);
-						rval = ofs_pc + RamImageOffset;
+						rval = pc;
 						break;
 					}
+
+					//lucore::LogInfo("[CPU] fetch 0x{:08x} 0x{:08x}", pc, ir);
 
 					rdid = (ir >> 7) & 0x1f;
 
@@ -91,6 +96,7 @@ namespace riscv {
 							if(reladdy & 0x00100000)
 								reladdy |= 0xffe00000;
 							rval = pc + 4;
+							//lucore::LogInfo("j/al 0x{:08x}", pc + reladdy);
 							pc = pc + reladdy - 4;
 							break;
 						}
@@ -100,6 +106,7 @@ namespace riscv {
 							i32 imm_se = imm | ((imm & 0x800) ? 0xfffff000 : 0);
 							rval = pc + 4;
 							pc = ((gpr[((ir >> 15) & 0x1f)] + imm_se) & ~1) - 4;
+							//lucore::LogInfo("jalr {}, 0x{:08x}", RegName(static_cast<Gpr>(((ir >> 15) & 0x1f))), ((gpr[((ir >> 15) & 0x1f)] + imm_se) & ~1) - 4);
 							break;
 						}
 
@@ -153,8 +160,6 @@ namespace riscv {
 							i32 imm_se = imm | ((imm & 0x800) ? 0xfffff000 : 0);
 							u32 rsval = rs1 + imm_se;
 
-							rsval -= RamImageOffset;
-
 							switch((ir >> 12) & 0x7) {
 								// LB, LH, LW, LBU, LHU
 								case 0:
@@ -178,7 +183,7 @@ namespace riscv {
 							}
 
 							if(trapped) {
-								rval = rsval + RamImageOffset;
+								rval = rsval;// + RamImageOffset;
 							}
 							break;
 						}
@@ -188,7 +193,7 @@ namespace riscv {
 							u32 addy = ((ir >> 7) & 0x1f) | ((ir & 0xfe000000) >> 20);
 							if(addy & 0x800)
 								addy |= 0xfffff000;
-							addy += rs1 - RamImageOffset;
+							addy += rs1;
 							rdid = 0;
 
 							switch((ir >> 12) & 0x7) {
@@ -200,6 +205,7 @@ namespace riscv {
 									bus->PokeShort(addy, rs2);
 									break;
 								case 2:
+									//lucore::LogInfo("storeWord(0x{:08x}, 0x{:08x})", addy, rs2);
 									bus->PokeWord(addy, rs2);
 									break;
 								default:
@@ -207,7 +213,7 @@ namespace riscv {
 							}
 
 							if(trapped) {
-								rval = addy + RamImageOffset;
+								rval = addy;// + RamImageOffset;
 							}
 							break;
 						}
@@ -457,13 +463,13 @@ namespace riscv {
 
 							// rs1 -= MINIRV32_RAM_IMAGE_OFFSET;
 
-							rs1 -= RamImageOffset;
+							//rs1 -= RamImageOffset;
 
 							// We don't implement load/store from UART or CLNT with RV32A here.
 
 							rval = bus->PeekWord(rs1);
 							if(trapped) {
-								rval = rs1 + RamImageOffset;
+								rval = rs1;// + RamImageOffset;
 								break;
 							}
 
@@ -523,6 +529,7 @@ namespace riscv {
 					break;
 
 				if(rdid) {
+					//lucore::LogInfo("writing register {} -> 0x{:08x}", RegName(static_cast<Gpr>(rdid)), rval);
 					gpr[rdid] = rval;
 				}
 

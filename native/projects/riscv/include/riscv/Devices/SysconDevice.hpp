@@ -11,6 +11,7 @@ namespace riscv::devices {
 
 		SysconDevice(System* system);
 
+		Address Base() const override { return BASE_ADDRESS; }
 		Address Size() const override { return sizeof(u32); } // I think this is right?
 
 		u32 Peek(Address address) override;

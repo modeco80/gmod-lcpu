@@ -1,5 +1,6 @@
 #pragma once
 #include <riscv/Types.hpp>
+#include <string_view>
 
 namespace riscv {
 
@@ -25,40 +26,77 @@ namespace riscv {
 	};
 
 	enum class Gpr : u8 {
-		X0, // zero
-		X1,
-		X2,
-		X3,
-		X4,
-		X5,
-		X6,
-		X7,
-		X8,
-		X9,
-		X10,
-		X11,
-		X12,
-		X13,
-		X14,
-		X15,
-		X16,
-		X17,
-		X18,
-		X19,
-		X20,
-		X21,
-		X22,
-		X23,
-		X24,
-		X25,
-		X26,
-		X27,
-		X28,
-		X29,
-		X30,
-		X31,
-		PC
+		Zero,
+		Ra,
+		Sp,
+		Gp,
+		Tp,
+		T0,
+		T1,
+		T2,
+		S0, // also `fp`
+		S1,
+		A0,
+		A1,
+		A2,
+		A3,
+		A4,
+		A5,
+		A6,
+		A7,
+		S2,
+		S3,
+		S4,
+		S5,
+		S6,
+		S7,
+		S8,
+		S9,
+		S10,
+		S11,
+		T3,
+		T4,
+		T5,
+		T6
 	};
+
+	constexpr std::string_view RegName(Gpr gpr) {
+		std::string_view table[] = {
+			"zero",
+			"ra",
+			"sp",
+			"gp",
+			"tp",
+			"t0",
+			"t1",
+			"t2",
+			"s0",
+			"s1",
+			"a0",
+			"a1",
+			"a2",
+			"a3",
+			"a4",
+			"a5",
+			"a6",
+			"a7",
+			"s2",
+			"s3",
+			"s4",
+			"s5",
+			"s6",
+			"s7",
+			"s8",
+			"s9",
+			"s10",
+			"s11",
+			"t3",
+			"t4",
+			"t5",
+			"t6"
+		};
+		return table[static_cast<usize>(gpr)];
+	}
 
 	/// Container for GPRs which can be Statically Typed or not depending on use case.
 	/// Pretty cool, huh?

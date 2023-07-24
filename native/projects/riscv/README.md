@@ -9,3 +9,7 @@ This is based off [cnlohr/mini-rv32ima](https://github.com/cnlohr/mini-rv32ima),
 - Moved *ALL* device and MMIO code to seperate interfaces
 
 Depends on lucore.
+
+# Usage
+
+TBD (if this is moved to another repo). See the riscv_test_harness project.
