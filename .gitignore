@@ -1,5 +1,6 @@
 build/
-lua/bin
+# this one is created by the build script
+module_build/
 native/projects/riscv/ref
 
 .cache/

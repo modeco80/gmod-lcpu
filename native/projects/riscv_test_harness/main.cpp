@@ -15,8 +15,8 @@ struct SimpleUartDevice : public riscv::Bus::MmioDevice {
 
 	u32 Peek(riscv::Address address) override {
 		switch(address) {
-			case BASE_ADDRESS: return 0x60; // active, but no keyboard input
-			case BASE_ADDRESS + 5: return '\0';
+			case BASE_ADDRESS: return '\0'; // just return 0 for the input register
+			case BASE_ADDRESS + 5: return 0x60; // active, but no keyboard input
 		}
 
 		return 0;

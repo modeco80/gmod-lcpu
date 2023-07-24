@@ -9,6 +9,10 @@ namespace riscv::devices {
 		RamDevice(Address base, Address size);
 		virtual ~RamDevice();
 
+		// Resize. DO NOT call this while actively using the memory,
+		// or you WILL crash.
+		void Resize(Address newSize);
+
 		// Implementation of Device interface
 
 		Address Base() const override;

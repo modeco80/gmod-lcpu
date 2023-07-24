@@ -53,8 +53,8 @@ void main() {
 
 	// Shut down the test harness once we're done testing.
 	puts("Tests done, shutting down test harness...\n");
-	SYSCON = 0x5555;
+	//SYSCON = 0x5555;
 
 	// loop forever
-	// for(;;);
+	for(;;);
 }

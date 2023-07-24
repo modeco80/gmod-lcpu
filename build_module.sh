@@ -2,15 +2,17 @@
 
 # Build the LCPU addon for the reccomended environment
 # and install it into the proper directory gmod wants native modules to be.
-# This expects to be ran in [gmod]/addons/[addon folder].
 
 set -x
 
-cmake -Wno-dev -GNinja -S native -B build -DCMAKE_BUILD_TYPE=Release
-ninja -C build
+# where your game server is
+GS_PATH="/home/lily/gs/gmod"
 
-[[ ! -d '../../lua/bin' ]] && {
-	mkdir -p ../../lua/bin
+cmake -Wno-dev -GNinja -S native -B module_build -DCMAKE_BUILD_TYPE=Release
+ninja -C module_build
+
+[[ ! -d "$GS_PATH/garrysmod/lua/bin" ]] && {
+	mkdir -p $GS_PATH/garrysmod/lua/bin
 }
 
-cp -v build/projects/lcpu/*.dll ../../lua/bin
+cp -v module_build/projects/lcpu/*.dll $GS_PATH/garrysmod/lua/bin

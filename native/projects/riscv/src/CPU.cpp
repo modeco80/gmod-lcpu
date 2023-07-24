@@ -279,9 +279,7 @@ namespace riscv {
 									// case 0xf12: rval = 0x00000000; break; //marchid
 									// case 0xf13: rval = 0x00000000; break; //mimpid
 									// case 0xf14: rval = 0x00000000; break; //mhartid
-									default:
-										// MINIRV32_OTHERCSR_READ(csrno, rval);
-										break;
+									default: break;
 								}
 
 								switch(microop) {
@@ -309,9 +307,7 @@ namespace riscv {
 									// case 0xf13: break; //mimpid
 									// case 0xf14: break; //mhartid
 									// case 0x301: break; //misa
-									default:
-										// MINIRV32_OTHERCSR_WRITE(csrno, writeval);
-										break;
+									default: break;
 								}
 							} else if(microop == 0x0) { // "SYSTEM" 0b000
 								rdid = 0;

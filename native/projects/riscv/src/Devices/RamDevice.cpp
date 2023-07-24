@@ -1,7 +1,5 @@
 #include <riscv/Devices/RamDevice.hpp>
 
-#include "riscv/Types.hpp"
-
 namespace riscv::devices {
 
 	RamDevice::RamDevice(Address base, Address size) : memoryBase(base), memorySize(size) {
@@ -11,6 +9,15 @@ namespace riscv::devices {
 
 	RamDevice::~RamDevice() {
 		delete[] memory;
+	}
+
+	void RamDevice::Resize(Address newSize) {
+		if(memory) {
+			delete[] memory;
+		}
+
+		memory = new u8[newSize];
+		memorySize = newSize;
 	}
 
 	Address RamDevice::Base() const {
