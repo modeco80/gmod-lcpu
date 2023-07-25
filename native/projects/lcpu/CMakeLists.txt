@@ -4,8 +4,7 @@ add_library(lcpu_native SHARED
 	src/main.cpp
 	src/LcpuGlobals.cpp
 	src/LuaCpu.cpp
-	#src/LuaDevice.cpp
-
+	src/LuaDevice.cpp
 	src/SourceSink.cpp
 )
 

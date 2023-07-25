@@ -10,8 +10,14 @@ struct LuaDevice : public riscv::Bus::MmioDevice {
 	static void Bind(GarrysMod::Lua::ILuaBase* LUA);
 	static void Create(GarrysMod::Lua::ILuaBase* LUA);
 
-	riscv::Address Base() const override { return base; }
-	riscv::Address Size() const override { return size; } // I think this is right?
+	~LuaDevice();
+
+	bool Clocked() const override;
+	void Clock() override;
+	void Reset() override;
+
+	riscv::Address Base() const override;
+	riscv::Address Size() const override;
 
 	u32 Peek(riscv::Address address) override;
 	void Poke(riscv::Address address, u32 value) override;
@@ -24,14 +30,10 @@ struct LuaDevice : public riscv::Bus::MmioDevice {
 	LUA_MEMBER_FUNCTION(SetBase);
 	LUA_MEMBER_FUNCTION(SetSize);
 
-	LUA_MEMBER_FUNCTION(SetClockHandler);
-	LUA_MEMBER_FUNCTION(SetResetHandler);
-	LUA_MEMBER_FUNCTION(SetPeekHandler);
-	LUA_MEMBER_FUNCTION(SetPokeHandler);
+	// GetBase/GetSize?
 
 	riscv::Address base {};
 	riscv::Address size {};
 
-	// ...?
 	GarrysMod::Lua::ILuaBase* LuaState;
 };

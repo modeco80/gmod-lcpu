@@ -34,67 +34,56 @@ struct SimpleUartDevice : public riscv::Bus::MmioDevice {
 LUA_CLASS_BIND_VARIABLES_IMPLEMENT(LuaCpu);
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, PoweredOn) {
-	LUA_CLASS_GET(LuaCpu, self, 1);
+	auto self = LUA_CLASS_GET(LuaCpu)(1);
 	LUA->PushBool(self->poweredOn);
 	return 1;
 }
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, Cycle) {
-	LUA_CLASS_GET(LuaCpu, self, 1);
-	[&self]() {
-		if(!self->poweredOn)
-			return;
-		self->system->Step();
-	}();
+	auto self = LUA_CLASS_GET(LuaCpu)(1);
+	if(!self->poweredOn)
+		return 0;
+	self->system->Step();
 	return 0;
 }
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, PowerOff) {
-	LUA_CLASS_GET(LuaCpu, self, 1);
-	[&self]() {
-		if(!self->poweredOn)
-			return;
+	auto self = LUA_CLASS_GET(LuaCpu)(1);
+	if(!self->poweredOn)
+		return 0;
 
-		self->poweredOn = false;
-		self->system->bus->Reset();
-	}();
-
+	self->poweredOn = false;
+	self->system->bus->Reset();
 	return 0;
 }
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, PowerOn) {
-	LUA_CLASS_GET(LuaCpu, self, 1);
-	[&self]() {
-		if(self->poweredOn)
-			return;
+	auto self = LUA_CLASS_GET(LuaCpu)(1);
+	if(self->poweredOn)
+		return 0;
 
-		self->poweredOn = true;
-		self->system->bus->Reset();
-	}();
+	self->poweredOn = true;
+	self->system->bus->Reset();
 	return 0;
 }
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, Reset) {
-	LUA_CLASS_GET(LuaCpu, self, 1);
-	[&self]() { self->system->bus->Reset(); }();
+	auto self = LUA_CLASS_GET(LuaCpu)(1);
+	self->system->bus->Reset();
 	return 0;
 }
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, AttachDevice) {
-	LUA_CLASS_GET(LuaCpu, self, 1);
-	bool result = false;
-#if 0
-	[&]() {
-		LUA_CLASS_GET(LuaDevice, device, 2);
-		if(!device)
-			return; // the bus is safe against this possibility, but
-					// I'd rather be doubly-safe tbh
+	auto self = LUA_CLASS_GET(LuaCpu)(1);
+	auto device = LUA_CLASS_GET(LuaDevice)(1);
+	
+	// the bus is safe against this possibility, but
+	// I'd rather be doubly-safe tbh
+	if(!device)
+		LUA->ThrowError("Null device pointer");
 
-		// Attach it
-		result = self->system->bus->AttachDevice(static_cast<riscv::Bus::Device*>(device));
-	}();
-#endif
-	LUA->PushBool(result);
+	// Attach it
+	LUA->PushBool(self->system->bus->AttachDevice(static_cast<riscv::Bus::Device*>(device)));
 	return 1;
 }
 
@@ -116,7 +105,7 @@ void LuaCpu::Create(GarrysMod::Lua::ILuaBase* LUA, u32 memorySize) {
 
 	// lame test code. this WILL be removed, I just want this for a quick test
 	cpuWrapper->system->bus->AttachDevice(new SimpleUartDevice);
-	auto fp = std::fopen("/home/lily/test.bin", "rb");
+	auto fp = std::fopen("/home/lily/test-gmod.bin", "rb");
 	if(fp) {
 		std::fseek(fp, 0, SEEK_END);
 		auto len = std::ftell(fp);
@@ -130,8 +119,6 @@ void LuaCpu::Create(GarrysMod::Lua::ILuaBase* LUA, u32 memorySize) {
 }
 
 LuaCpu::LuaCpu(u32 memorySize) {
-	lucore::LogInfo("in LuaCpu::LuaCpu(0x{:08x})\n", memorySize);
-
 	poweredOn = true;
 	system = riscv::System::Create(memorySize);
 	system->OnPowerOff = [&]() {
