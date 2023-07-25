@@ -38,9 +38,7 @@ namespace riscv {
 			/// This function is called by the bus to clock devices.
 			virtual void Clock() {}
 
-			// ability to interrupt
-
-			// probably some reset functionality later on
+			virtual void Reset() {}
 
 			template <class T>
 			constexpr bool IsA() {
@@ -126,6 +124,7 @@ namespace riscv {
 
 		/// Clock all clocked devices mapped onto the bus..
 		void Clock();
+		void Reset();
 
 		u8 PeekByte(Address address);
 		u16 PeekShort(Address address);

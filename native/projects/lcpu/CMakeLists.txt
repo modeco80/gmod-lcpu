@@ -1,12 +1,12 @@
 include(./gmod_headers.cmake)
 
-
 add_library(lcpu_native SHARED
+	src/main.cpp
+	src/LcpuGlobals.cpp
+	src/LuaCpu.cpp
+	#src/LuaDevice.cpp
 
 	src/SourceSink.cpp
-
-	src/main.cpp
-	src/LuaCpu.cpp
 )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")

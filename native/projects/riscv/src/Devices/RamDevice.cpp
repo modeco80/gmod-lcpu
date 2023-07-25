@@ -3,7 +3,7 @@
 namespace riscv::devices {
 
 	RamDevice::RamDevice(Address base, Address size) : memoryBase(base), memorySize(size) {
-		memory = new u8[size];
+		memory = new u8[size]{};
 		LUCORE_CHECK(memory, "Could not allocate buffer for memory device with size 0x{:08x}.", size);
 	}
 

@@ -71,7 +71,7 @@ namespace riscv {
 	struct GeneralPurposeRegisters {
 		constexpr u32& operator[](Gpr gpr) { return operator[](static_cast<usize>(gpr)); }
 		constexpr u32& operator[](usize index) { return gprs_[index]; }
-		u32 gprs_[32];
+		u32 gprs_[32]{};
 	};
 
 } // namespace riscv

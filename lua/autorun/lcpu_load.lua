@@ -1,6 +1,7 @@
 AddCSLuaFile()
 
--- prime the native lua module if running on the server
+-- prime the native lua module & add clientside files to send
+-- if running on the server
 if SERVER then
 	require("lcpu_native")
 
@@ -11,5 +12,4 @@ if SERVER then
 	end
 
 	AddCSLuaFile("entities/gmod_lcpu_cpu.lua")
-	AddCSLuaFile("lcpu/stool_helper.lua")
 end

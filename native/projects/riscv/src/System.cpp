@@ -12,9 +12,6 @@ namespace riscv {
 		system->clnt = new devices::ClntDevice();
 		system->syscon = new devices::SysconDevice(system);
 
-		// techinically this is done on construction but lets be hard about it
-		system->cpu->Reset();
-
 		// attach everything into the bus
 		if(!system->bus->AttachDevice(system->cpu))
 			return nullptr;
@@ -24,6 +21,9 @@ namespace riscv {
 			return nullptr;
 		if(!system->bus->AttachDevice(system->ram))
 			return nullptr;
+
+		// reset the bus and all devices on it
+		system->bus->Reset();
 
 		return system;
 	}

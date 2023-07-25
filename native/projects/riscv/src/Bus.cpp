@@ -63,6 +63,12 @@ namespace riscv {
 		cpu->Clock();
 	}
 
+	void Bus::Reset() {
+		for(auto device : devices)
+			device->Reset();
+		cpu->Reset();
+	}
+
 	u8 Bus::PeekByte(Address address) {
 		if(auto dev = FindDeviceForAddress(address); dev)
 			return dev->Upcast<MemoryDevice*>()->PeekByte(address);

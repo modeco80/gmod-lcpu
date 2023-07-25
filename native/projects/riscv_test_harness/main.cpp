@@ -5,6 +5,8 @@
 #include <lucore/StdoutSink.hpp>
 #include <riscv/System.hpp>
 
+#include <thread>
+
 /// simple 16550 UART implementation
 struct SimpleUartDevice : public riscv::Bus::MmioDevice {
 	constexpr static riscv::Address BASE_ADDRESS = 0x10000000;
@@ -59,6 +61,7 @@ int main(int argc, char** argv) {
 
 	while(!shouldExit) {
 		system->Step();
+		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 
 	delete system;

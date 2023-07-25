@@ -15,6 +15,8 @@ namespace riscv::devices {
 		bool Clocked() const override { return true; }
 		void Clock() override;
 
+		void Reset() override;
+
 		u32 Peek(Address address) override;
 		void Poke(Address address, u32 value) override;
 

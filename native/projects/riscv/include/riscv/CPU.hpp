@@ -27,25 +27,25 @@ namespace riscv {
 		// TODO: Handlers for CSR read/write (if we need it?)
 
 		/// CPU state
-		GeneralPurposeRegisters gpr;
-		u32 pc;
-		u32 mstatus;
-		u32 cyclel;
-		u32 cycleh;
-		u32 mscratch;
-		u32 mtvec;
-		u32 mie;
-		u32 mip;
+		GeneralPurposeRegisters gpr{};
+		u32 pc{};
+		u32 mstatus{};
+		u32 cyclel{};
+		u32 cycleh{};
+		u32 mscratch{};
+		u32 mtvec{};
+		u32 mie{};
+		u32 mip{};
 
-		u32 mepc;
-		u32 mtval;
-		u32 mcause;
+		u32 mepc{};
+		u32 mtval{};
+		u32 mcause{};
 
 		// Note: only a few bits are used.  (Machine = 3, User = 0)
 		// Bits 0..1 = privilege.
 		// Bit 2 = WFI (Wait for interrupt)
 		// Bit 3+ = Load/Store reservation LSBs.
-		u32 extraflags;
+		u32 extraflags{};
 
 	   private:
 		/// Set by [CPU::Trap] to tell the CPU it was trapped.

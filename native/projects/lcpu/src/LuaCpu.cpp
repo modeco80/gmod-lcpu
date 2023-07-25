@@ -2,7 +2,8 @@
 
 #include <lucore/Logger.hpp>
 
-#include "LuaMember.hpp"
+#include "LuaDevice.hpp"
+#include "LuaHelpers.hpp"
 
 // this is temporary from the thing
 
@@ -11,7 +12,6 @@ struct SimpleUartDevice : public riscv::Bus::MmioDevice {
 	constexpr static riscv::Address BASE_ADDRESS = 0x10000000;
 
 	riscv::Address Base() const override { return BASE_ADDRESS; }
-
 	riscv::Address Size() const override { return 12; } // for now
 
 	u32 Peek(riscv::Address address) override {
@@ -26,83 +26,120 @@ struct SimpleUartDevice : public riscv::Bus::MmioDevice {
 	void Poke(riscv::Address address, u32 value) override {
 		if(address == BASE_ADDRESS) {
 			char c = value & 0x000000ff;
-			fputc(c, stderr);
+			std::fputc(c, stderr);
 		}
 	}
 };
 
-int LuaCpu::__lua_typeid;
+LUA_CLASS_BIND_VARIABLES_IMPLEMENT(LuaCpu);
+
+LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, PoweredOn) {
+	LUA_CLASS_GET(LuaCpu, self, 1);
+	LUA->PushBool(self->poweredOn);
+	return 1;
+}
+
+LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, Cycle) {
+	LUA_CLASS_GET(LuaCpu, self, 1);
+	[&self]() {
+		if(!self->poweredOn)
+			return;
+		self->system->Step();
+	}();
+	return 0;
+}
+
+LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, PowerOff) {
+	LUA_CLASS_GET(LuaCpu, self, 1);
+	[&self]() {
+		if(!self->poweredOn)
+			return;
+
+		self->poweredOn = false;
+		self->system->bus->Reset();
+	}();
+
+	return 0;
+}
+
+LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, PowerOn) {
+	LUA_CLASS_GET(LuaCpu, self, 1);
+	[&self]() {
+		if(self->poweredOn)
+			return;
+
+		self->poweredOn = true;
+		self->system->bus->Reset();
+	}();
+	return 0;
+}
+
+LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, Reset) {
+	LUA_CLASS_GET(LuaCpu, self, 1);
+	[&self]() { self->system->bus->Reset(); }();
+	return 0;
+}
+
+LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, AttachDevice) {
+	LUA_CLASS_GET(LuaCpu, self, 1);
+	bool result = false;
+#if 0
+	[&]() {
+		LUA_CLASS_GET(LuaDevice, device, 2);
+		if(!device)
+			return; // the bus is safe against this possibility, but
+					// I'd rather be doubly-safe tbh
+
+		// Attach it
+		result = self->system->bus->AttachDevice(static_cast<riscv::Bus::Device*>(device));
+	}();
+#endif
+	LUA->PushBool(result);
+	return 1;
+}
 
 void LuaCpu::Bind(GarrysMod::Lua::ILuaBase* LUA) {
-	lucore::LogInfo("In LuaCpu::Bind()");
-	__lua_typeid = LUA->CreateMetaTable("LuaCpu");
-	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_REG);
-		LUA->PushNumber(__lua_typeid);
-		LUA->SetField(-2, "LuaCpu__typeid");
-	LUA->Pop(); // Pop the registry
-
-		LUA->Push(-1);
-		// This method is called when the GC is done with our stuff
-		LUA->PushCFunction(__gc);
-		LUA->SetField(-1, "__gc");
-
-		LUA->PushCFunction(Cycle);
-		LUA->SetField(-1, "Cycle");
-	LUA->Pop();
+	// clang-format off
+	LUA_CLASS_BIND_BEGIN(LuaCpu);
+			LUA_SET_C_FUNCTION(PoweredOn);
+			LUA_SET_C_FUNCTION(Cycle);
+			LUA_SET_C_FUNCTION(PowerOff);
+			LUA_SET_C_FUNCTION(PowerOn);
+			LUA_SET_C_FUNCTION(Reset);
+			LUA_SET_C_FUNCTION(AttachDevice);
+	LUA_CLASS_BIND_END();
+	// clang-format on
 }
 
 void LuaCpu::Create(GarrysMod::Lua::ILuaBase* LUA, u32 memorySize) {
-	LUA->PushUserType(new LuaCpu(memorySize), __lua_typeid);
-}
-
-LuaCpu::LuaCpu(u32 memorySize) {
-	system = riscv::System::Create(memorySize);
-	system->OnPowerOff = [&]() { this->OnSysconShutdown(); };
-
-	system->bus->AttachDevice(new SimpleUartDevice);
+	auto cpuWrapper = new LuaCpu(memorySize);
 
 	// lame test code. this WILL be removed, I just want this for a quick test
-	auto fp = std::fopen("/home/lily/gs/gmod/garrysmod/addons/lcpu/native/projects/riscv_test_harness/test/test.bin", "rb");
+	cpuWrapper->system->bus->AttachDevice(new SimpleUartDevice);
+	auto fp = std::fopen("/home/lily/test.bin", "rb");
 	if(fp) {
 		std::fseek(fp, 0, SEEK_END);
 		auto len = std::ftell(fp);
 		std::fseek(fp, 0, SEEK_SET);
 
-		std::fread(system->ram->Raw(), 1, len, fp);
+		std::fread(cpuWrapper->system->ram->Raw(), 1, len, fp);
 		std::fclose(fp);
 	}
+
+	LUA->PushUserType(cpuWrapper, __lua_typeid);
+}
+
+LuaCpu::LuaCpu(u32 memorySize) {
+	lucore::LogInfo("in LuaCpu::LuaCpu(0x{:08x})\n", memorySize);
+
+	poweredOn = true;
+	system = riscv::System::Create(memorySize);
+	system->OnPowerOff = [&]() {
+		poweredOn = false;
+		system->bus->Reset();
+	};
 }
 
 LuaCpu::~LuaCpu() {
 	delete system;
-}
-
-void LuaCpu::CycleImpl() {
-	if(!poweredOn)
-		return;
-
-	system->Step();
-}
-
-void LuaCpu::OnSysconShutdown() {
-	poweredOn = false;
-}
-
-LUA_MEMBER_FUNCTION(LuaCpu, __gc) {
-	auto self = LUA->GetUserType<LuaCpu>(1, __lua_typeid);
-	if(self != nullptr) { // GetUserType returns nullptr on failure
-		delete self;
-	}
-
-	return 0;
-}
-
-LUA_MEMBER_FUNCTION(LuaCpu, Cycle) {
-	auto self = LUA->GetUserType<LuaCpu>(1, __lua_typeid);
-	if(!self) {
-		LUA->ThrowError("invalid self argument for LuaCpu:Cycle()");
-	}
-
-	self->CycleImpl();
-	return 0;
 }
