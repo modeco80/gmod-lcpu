@@ -5,7 +5,10 @@ add_library(lcpu_native SHARED
 	src/LcpuGlobals.cpp
 	src/LuaCpu.cpp
 	src/LuaDevice.cpp
+
+	# Support code
 	src/SourceSink.cpp
+	src/LuaShared.cpp
 )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")

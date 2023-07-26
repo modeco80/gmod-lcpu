@@ -11,7 +11,6 @@
 #define LCPU_SUPPORT_OLD_GMOD
 
 namespace tier0 {
-	// TODO: For now this'll leak..
 	lucore::Library* library = nullptr;
 
 	using Msg_t = void (*)(const char*, ...);

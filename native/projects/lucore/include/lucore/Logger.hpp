@@ -84,22 +84,27 @@ namespace lucore {
 	};
 
 	template <class... Args>
-	void LogInfo(std::string_view format, Args... args) {
+	constexpr void LogDebug(std::string_view format, Args... args) {
+		Logger::The().Debug(format, std::forward<Args>(args)...);
+	}
+
+	template <class... Args>
+	constexpr void LogInfo(std::string_view format, Args... args) {
 		Logger::The().Info(format, std::forward<Args>(args)...);
 	}
 
 	template <class... Args>
-	void LogWarning(std::string_view format, Args... args) {
+	constexpr void LogWarning(std::string_view format, Args... args) {
 		Logger::The().Warning(format, std::forward<Args>(args)...);
 	}
 
 	template <class... Args>
-	void LogError(std::string_view format, Args... args) {
+	constexpr void LogError(std::string_view format, Args... args) {
 		Logger::The().Error(format, std::forward<Args>(args)...);
 	}
 
 	template <class... Args>
-	void LogFatal(std::string_view format, Args... args) {
+	constexpr void LogFatal(std::string_view format, Args... args) {
 		Logger::The().Fatal(format, std::forward<Args>(args)...);
 	}
 

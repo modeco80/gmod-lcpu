@@ -18,8 +18,17 @@ namespace lucore {
 
 	Library* Library::OpenExisting(std::string_view dllname) {
 		auto name = FormatLibraryName(dllname);
-		if(!detail::OsLibraryLoaded(name.c_str()))
+		if(!detail::OsLibraryLoaded(name.c_str())) {
+#ifndef _WIN32
+			// Try without a prefix; some libraries need this.
+			name = std::format("{}.so", dllname);
+			if(!detail::OsLibraryLoaded(name.c_str()))
+				return nullptr;
+#else
 			return nullptr;
+#endif
+		}
+
 		return new Library(detail::OsOpenLibrary(name.c_str()));
 	}
 
