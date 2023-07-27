@@ -65,7 +65,7 @@ LUA_FUNCTION(LCPUNative_CreateDevice) {
 }
 
 void GlobalsBind(GarrysMod::Lua::ILuaBase* LUA) {
-	LuaCpu::Bind(LUA);
+	LuaCpu::RegisterClass(LUA);
 	LuaDevice::RegisterClass(LUA);
 	TestLuaObject::RegisterClass(LUA);
 

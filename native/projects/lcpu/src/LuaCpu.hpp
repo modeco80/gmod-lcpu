@@ -1,20 +1,20 @@
-#pragma once 
+#pragma once
 
 #include <riscv/System.hpp>
 
-#include "LuaHelpers.hpp"
+#include "LuaObject.hpp"
 
 /// Bindings of [riscv::System] to Lua.
-struct LuaCpu {
+struct LuaCpu : public lcpu::lua::LuaObject<LuaCpu> {
 	/// Lua binding stuff
-	static void Bind(GarrysMod::Lua::ILuaBase* LUA);
-	static void Create(GarrysMod::Lua::ILuaBase* LUA, u32 memorySize);
+	constexpr static const char* Name() { return "LuaCpu"; }
+	static void RegisterClass(GarrysMod::Lua::ILuaBase* LUA);
 
-   private:
-
+   protected:
+	friend struct lcpu::lua::LuaObject<LuaCpu>;
 	LuaCpu(u32 memorySize);
 	~LuaCpu();
-
+   private:
 	LUA_MEMBER_FUNCTION(PoweredOn);	   // Check if the CPU is powered on
 	LUA_MEMBER_FUNCTION(Cycle);		   // do a single cycle (called internally by LCPU entity)
 	LUA_MEMBER_FUNCTION(PowerOff);	   // power off and reset the LCPU

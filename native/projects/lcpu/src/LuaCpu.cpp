@@ -3,7 +3,6 @@
 #include <lucore/Logger.hpp>
 
 #include "LuaDevice.hpp"
-#include "LuaHelpers.hpp"
 
 // this is temporary from the thing
 
@@ -31,16 +30,14 @@ struct SimpleUartDevice : public riscv::Bus::MmioDevice {
 	}
 };
 
-LUA_CLASS_BIND_VARIABLES_IMPLEMENT(LuaCpu);
-
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, PoweredOn) {
-	auto self = LUA_CLASS_GET(LuaCpu)(1);
+	auto self = LuaCpu::FromLua(LUA, 1);
 	LUA->PushBool(self->poweredOn);
 	return 1;
 }
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, Cycle) {
-	auto self = LUA_CLASS_GET(LuaCpu)(1);
+	auto self = LuaCpu::FromLua(LUA, 1);
 	if(!self->poweredOn)
 		return 0;
 	self->system->Step();
@@ -48,7 +45,7 @@ LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, Cycle) {
 }
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, PowerOff) {
-	auto self = LUA_CLASS_GET(LuaCpu)(1);
+	auto self = LuaCpu::FromLua(LUA, 1);
 	if(!self->poweredOn)
 		return 0;
 
@@ -58,7 +55,7 @@ LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, PowerOff) {
 }
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, PowerOn) {
-	auto self = LUA_CLASS_GET(LuaCpu)(1);
+	auto self = LuaCpu::FromLua(LUA, 1);
 	if(self->poweredOn)
 		return 0;
 
@@ -68,49 +65,29 @@ LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, PowerOn) {
 }
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, Reset) {
-	auto self = LUA_CLASS_GET(LuaCpu)(1);
+	auto self = LuaCpu::FromLua(LUA, 1);
 	self->system->bus->Reset();
 	return 0;
 }
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, AttachDevice) {
-	auto self = LUA_CLASS_GET(LuaCpu)(1);
+	auto self = LuaCpu::FromLua(LUA, 1);
 	auto device = LuaDevice::FromLua(LUA, 2);
-	
+
 	// Attach it
 	LUA->PushBool(self->system->bus->AttachDevice(static_cast<riscv::Bus::Device*>(device)));
 	return 1;
 }
 
-void LuaCpu::Bind(GarrysMod::Lua::ILuaBase* LUA) {
-	// clang-format off
-	LUA_CLASS_BIND_BEGIN(LuaCpu);
-			LUA_SET_C_FUNCTION(PoweredOn);
-			LUA_SET_C_FUNCTION(Cycle);
-			LUA_SET_C_FUNCTION(PowerOff);
-			LUA_SET_C_FUNCTION(PowerOn);
-			LUA_SET_C_FUNCTION(Reset);
-			LUA_SET_C_FUNCTION(AttachDevice);
-	LUA_CLASS_BIND_END();
-	// clang-format on
-}
+void LuaCpu::RegisterClass(GarrysMod::Lua::ILuaBase* LUA) {
+	RegisterClassStart(LUA);
 
-void LuaCpu::Create(GarrysMod::Lua::ILuaBase* LUA, u32 memorySize) {
-	auto cpuWrapper = new LuaCpu(memorySize);
-
-	// lame test code. this WILL be removed, I just want this for a quick test
-	cpuWrapper->system->bus->AttachDevice(new SimpleUartDevice);
-	auto fp = std::fopen("/home/lily/test-gmod.bin", "rb");
-	if(fp) {
-		std::fseek(fp, 0, SEEK_END);
-		auto len = std::ftell(fp);
-		std::fseek(fp, 0, SEEK_SET);
-
-		std::fread(cpuWrapper->system->ram->Raw(), 1, len, fp);
-		std::fclose(fp);
-	}
-
-	LUA->PushUserType(cpuWrapper, __lua_typeid);
+	RegisterMethod("PoweredOn", PoweredOn);
+	RegisterMethod("Cycle", Cycle);
+	RegisterMethod("PowerOff", PowerOff);
+	RegisterMethod("PowerOn", PowerOn);
+	RegisterMethod("Reset", Reset);
+	RegisterMethod("AttachDevice", AttachDevice);
 }
 
 LuaCpu::LuaCpu(u32 memorySize) {
@@ -120,6 +97,18 @@ LuaCpu::LuaCpu(u32 memorySize) {
 		poweredOn = false;
 		system->bus->Reset();
 	};
+
+	// lame test code. this WILL be removed, I just want this for a quick test
+	system->bus->AttachDevice(new SimpleUartDevice);
+	auto fp = std::fopen("/home/lily/test-gmod.bin", "rb");
+	if(fp) {
+		std::fseek(fp, 0, SEEK_END);
+		auto len = std::ftell(fp);
+		std::fseek(fp, 0, SEEK_SET);
+
+		std::fread(system->ram->Raw(), 1, len, fp);
+		std::fclose(fp);
+	}
 }
 
 LuaCpu::~LuaCpu() {
