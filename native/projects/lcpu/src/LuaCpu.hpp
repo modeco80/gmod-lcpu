@@ -22,9 +22,6 @@ struct LuaCpu : public lcpu::lua::LuaObject<LuaCpu> {
 	LUA_MEMBER_FUNCTION(Reset);		   // reset the LCPU
 	LUA_MEMBER_FUNCTION(AttachDevice); // attach a LuaDevice to this cpu
 
-	// class binding stuff
-	LUA_CLASS_BIND_VARIABLES(private);
-
 	// member variables
 	riscv::System* system;
 	bool poweredOn;
