@@ -4,12 +4,6 @@
 
 namespace riscv {
 
-	Bus::~Bus() {
-		// Free all devices
-		for(auto device : devices)
-			delete device;
-	}
-
 	bool Bus::AttachDevice(Device* device) {
 		if(!device)
 			return false;

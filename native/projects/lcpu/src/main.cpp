@@ -6,19 +6,15 @@
 
 #include "LcpuGlobals.hpp"
 
-#include "LuaShared.hpp"
-
 GMOD_MODULE_OPEN() {
+	// Initialize our lua_shared binding. It is important we ca
 	lucore::Logger::The().AttachSink(lcpu::SourceSink::The());
 	lucore::LogInfo("LCPU Native Module! (ModuleVersion {})", LCPU_MODULE_VERSION);
-
-	lcpu::lua::LoadLuaShared();
 
 	GlobalsBind(LUA);
 	return 0;
 }
 
-GMOD_MODULE_CLOSE() {
-	lcpu::lua::UnloadLuaShared();
+GMOD_MODULE_CLOSE()  {
 	return 0;
 }

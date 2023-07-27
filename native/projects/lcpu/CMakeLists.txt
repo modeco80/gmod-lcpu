@@ -8,7 +8,6 @@ add_library(lcpu_native SHARED
 
 	# Support code
 	src/SourceSink.cpp
-	src/LuaShared.cpp
 )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -22,6 +21,7 @@ endif()
 
 target_link_libraries(lcpu_native
 	gmod_headers
+
 	lucore::lucore
 	riscv::riscv
 )

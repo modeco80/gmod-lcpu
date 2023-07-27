@@ -105,14 +105,10 @@ namespace riscv {
 			virtual void Poke(Address address, u32 value) = 0;
 		};
 
-		/// Bus destructor.
-		/// This frees the memory for all devices.
-		~Bus();
-
 		/// Attach a device to the bus.
 		///
 		/// Note that once this function is called (and the device is successfully added),
-		/// the object pointed to by [device] is owned by the Bus object, and should not be deleted.
+		/// the object pointed to by [device] should last at least as long as the bus.
 		///
 		/// # Returns
 		/// This function returns true if the device was able to be put on the bus.

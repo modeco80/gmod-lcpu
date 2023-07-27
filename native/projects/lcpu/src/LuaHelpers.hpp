@@ -34,31 +34,32 @@
    public:                                     \
 	static int __lua_typeid;                   \
 	ACCESS_LEVEL:                              \
-	LUA_MEMBER_FUNCTION(__gc);
+	LUA_MEMBER_FUNCTION(__gc); 
 
 // Implement required binding variables (typically in a .cpp file).
-#define LUA_CLASS_BIND_VARIABLES_IMPLEMENT(T)                              \
-	int T::__lua_typeid = 0;                                               \
-	LUA_MEMBER_FUNCTION_IMPLEMENT(T, __gc) {                               \
-		LUA->CheckType(1, T::__lua_typeid);                                \
-		auto self = LUA->GetUserType<T>(1, T::__lua_typeid);               \
-		if(self != nullptr) { /* GetUserType returns nullptr on failure */ \
-			lucore::LogInfo("GCing {} object", #T);                        \
-			delete self;                                                   \
-		}                                                                  \
-		return 0;                                                          \
-	}
+#define LUA_CLASS_BIND_VARIABLES_IMPLEMENT(T)                                        \
+	int T::__lua_typeid = 0;                                                         \
+	LUA_MEMBER_FUNCTION_IMPLEMENT(T, __gc) {                                         \
+		LUA->CheckType(1, T::__lua_typeid);                                          \
+		auto self = LUA->GetUserType<T>(1, T::__lua_typeid);                         \
+		if(self != nullptr) { /* GetUserType returns nullptr on failure */           \
+			lucore::LogInfo("GCing {} object @ {:p}", #T, static_cast<void*>(self)); \
+			delete self;                                                             \
+		}                                                                            \
+		return 0;                                                                    \
+	} 
+	
 
 // Begin the Bind() method of a class. This just sets up boilerplate
 // and required things to setup a class.
-#define LUA_CLASS_BIND_BEGIN(T)                    \
-	T::__lua_typeid = LUA->CreateMetaTable(#T);    \
-	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_REG); \
-	LUA->PushNumber(T::__lua_typeid);              \
-	LUA->SetField(-2, #T "__typeid");              \
-	LUA->Pop(); /* pop registry */                 \
-	LUA->Push(-1);                                 \
-	LUA->SetField(-2, "__index");                  \
+#define LUA_CLASS_BIND_BEGIN(T)                                                \
+	T::__lua_typeid = LUA->CreateMetaTable(#T);                                \
+	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_REG);                             \
+	LUA->PushNumber(T::__lua_typeid);                                          \
+	LUA->SetField(-2, #T "__typeid");                                          \
+	LUA->Pop(); /* pop registry */                                             \
+	LUA->Push(-1);                                                             \
+	LUA->SetField(-2, "__index");                                              \
 	LUA_SET_C_FUNCTION(__gc)
 
 // End the Bind() method.
@@ -73,3 +74,14 @@
 #define LUA_SET_C_FUNCTION_NAME(name, altName) \
 	LUA->PushCFunction(name);                  \
 	LUA->SetField(-2, altName);
+
+
+inline std::string GetLuaString(GarrysMod::Lua::ILuaBase* LUA, int stackPos) {
+	unsigned len{};
+	auto ptr = LUA->GetString(stackPos, &len);
+	if(ptr) {
+		return std::string(ptr, len);
+	} else {
+		return {};
+	}
+}

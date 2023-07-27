@@ -8,7 +8,7 @@
 struct LuaDevice : public riscv::Bus::MmioDevice {
 	/// Lua binding stuff
 	static void Bind(GarrysMod::Lua::ILuaBase* LUA);
-	static void Create(GarrysMod::Lua::ILuaBase* LUA);
+	static void Create(GarrysMod::Lua::ILuaBase* LUA, riscv::Address base, riscv::Address size);
 
 	~LuaDevice();
 
@@ -26,14 +26,15 @@ struct LuaDevice : public riscv::Bus::MmioDevice {
 	// class binding stuff
 	LUA_CLASS_BIND_VARIABLES(private);
 
-	// Do not call these once attached to a bus.
-	LUA_MEMBER_FUNCTION(SetBase);
-	LUA_MEMBER_FUNCTION(SetSize);
+	LUA_MEMBER_FUNCTION(__index);
+	LUA_MEMBER_FUNCTION(__newindex); 
 
-	// GetBase/GetSize?
+	LuaDevice(riscv::Address base, riscv::Address size);
 
 	riscv::Address base {};
 	riscv::Address size {};
-
 	GarrysMod::Lua::ILuaBase* LuaState;
+
+	// this should be a common type tbh
+	int tableReference = -1;
 };

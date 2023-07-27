@@ -30,7 +30,13 @@ namespace riscv {
 
 	System::~System() {
 		delete cpu;
-		delete bus; // the rest of the device pointers will be deleted by the bus.
+		delete bus;
+
+		// delete our devices
+		// externally bound devices should clean themselves up
+		delete clnt;
+		delete syscon;
+		delete ram;
 	}
 
 	void System::Step() {

@@ -1,9 +1,9 @@
 #include "LcpuGlobals.hpp"
 
+#include "GarrysMod/Lua/Interface.h"
 #include "LuaCpu.hpp"
 #include "LuaDevice.hpp"
-
-
+#include "LuaHelpers.hpp"
 
 LUA_FUNCTION(LCPUNative_CreateCPU) {
 	LUA->CheckType(1, GarrysMod::Lua::Type::Number);
@@ -18,13 +18,16 @@ LUA_FUNCTION(LCPUNative_CreateCPU) {
 }
 
 LUA_FUNCTION(LCPUNative_CreateDevice) {
-	LuaDevice::Create(LUA);
+	auto base = LUA->CheckNumber(1);
+	auto size = LUA->CheckNumber(2);
+	lucore::LogInfo("Creating Lua device object mapped @ 0x{:08x} with size 0x{:08x}", static_cast<riscv::Address>(base), static_cast<riscv::Address>(size));
+	LuaDevice::Create(LUA, static_cast<riscv::Address>(base), static_cast<riscv::Address>(size));
 	return 1;
 }
 
 void GlobalsBind(GarrysMod::Lua::ILuaBase* LUA) {
 	LuaCpu::Bind(LUA);
-	// LuaDevice::Bind(LUA);
+	LuaDevice::Bind(LUA);
 
 	// clang-format off
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
