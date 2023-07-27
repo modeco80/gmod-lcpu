@@ -10,7 +10,7 @@ function ENT:Initialize()
 	self:SetSolid(SOLID_VPHYSICS)
 	-- 64 kb of ram for now.
 	self.cpu = LCPUNative.CreateCPU(128 * 1024)
-	print(self.cpu)
+
 	-- todo: cpu callbacks? once they become a thing
 	-- test device framework
 	-- (for once something works out how I wanted it to..)

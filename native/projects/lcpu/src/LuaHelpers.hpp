@@ -7,8 +7,6 @@
 
 #include <lucore/Logger.hpp>
 
-#include "GarrysMod/Lua/LuaBase.h"
-
 // These are like the official GMOD header LUA_FUNCTION but allow forward declaration
 // and implementation inside of classes, making writing class bindings that much less
 // of a PITA. Nifty!

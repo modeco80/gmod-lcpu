@@ -1,6 +1,6 @@
 #include "LcpuGlobals.hpp"
 
-#include "GarrysMod/Lua/Interface.h"
+#include <GarrysMod/Lua/Interface.h>
 #include "LuaCpu.hpp"
 #include "LuaDevice.hpp"
 
