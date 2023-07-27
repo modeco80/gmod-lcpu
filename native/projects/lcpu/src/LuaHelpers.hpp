@@ -89,6 +89,8 @@ namespace lcpu::lua {
 		}
 	}
 
+	/// A CRTP-based class which allows binding C++ to Lua, in a
+	/// fairly sensible manner.
 	template <class TImpl>
 	struct LuaObject {
 		using CFunc = GarrysMod::Lua::CFunc;
@@ -128,7 +130,8 @@ namespace lcpu::lua {
 				LUA->PushSpecial(GarrysMod::Lua::SPECIAL_REG);
 					LUA->PushNumber(__lua_typeid);
 					LUA->SetField(-2, typeid_name.c_str());
-				LUA->Pop(); /* pop registry */
+				LUA->Pop(); // pop registry
+				// add in required metamethods
 				LUA_SET_C_FUNCTION(__gc)
 				LUA_SET_C_FUNCTION(__index)
 				LUA_SET_C_FUNCTION(__newindex)
@@ -158,6 +161,10 @@ namespace lcpu::lua {
 				lua->ReferenceFree(tableReference);
 		}
 
+
+		/// The LUA interface used to create this class.
+		GarrysMod::Lua::ILuaBase* lua;
+
 	   private:
 		// base metamethods
 		LUA_MEMBER_FUNCTION(__gc)
@@ -184,7 +191,6 @@ namespace lcpu::lua {
 
 		// instance stuff
 		int tableReference { -1 };
-		GarrysMod::Lua::ILuaBase* lua;
 	};
 
 	template <class TImpl>
@@ -235,15 +241,18 @@ namespace lcpu::lua {
 		if(LUA->GetType(2) == GarrysMod::Lua::Type::String) {
 			auto key = GetLuaString(LUA, 2);
 
-			if(methods().find(key) != methods().end()) {
+			// don't allow overwriting methods
+			if(methods().find(key) != methods().end())
 				return 0;
-			}
 
-			if(getters().find(key) != getters().end() && setters().find(key) == setters().end()) {
+			// or read-only values
+			if(getters().find(key) != getters().end() && setters().find(key) == setters().end())
 				return 0;
-			}
 
 			if(setters().find(key) != setters().end()) {
+				// for ergonomic sake only I kind of want to make this like
+				// LUA->Push(3) so that -1 (top of stack) is the value
+				// a bit cleaner. idk
 				setters()[key](LUA);
 				return 0;
 			}
