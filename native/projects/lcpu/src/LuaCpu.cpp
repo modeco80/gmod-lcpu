@@ -75,7 +75,7 @@ LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, Reset) {
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaCpu, AttachDevice) {
 	auto self = LUA_CLASS_GET(LuaCpu)(1);
-	auto device = LUA_CLASS_GET(LuaDevice)(2);
+	auto device = LuaDevice::FromLua(LUA, 2);
 	
 	// Attach it
 	LUA->PushBool(self->system->bus->AttachDevice(static_cast<riscv::Bus::Device*>(device)));

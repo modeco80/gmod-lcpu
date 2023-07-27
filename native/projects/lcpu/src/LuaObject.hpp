@@ -1,3 +1,5 @@
+#pragma once
+
 //#include <functional>
 
 #include "GarrysMod/Lua/Interface.h"
@@ -92,6 +94,8 @@ namespace lcpu::lua {
 			// register some convinence things
 			RegisterGetter("Name", [](GarrysMod::Lua::ILuaBase* LUA) { LUA->PushString(TImpl::Name()); });
 		}
+
+		int GetTableReference() { return tableReference; }
 
 		LuaObject() = default;
 		~LuaObject() {

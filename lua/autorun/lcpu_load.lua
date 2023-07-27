@@ -10,7 +10,7 @@ if SERVER then
 		return
 	end
 
-----[[
+--[[
 	testobj = LCPUNative.CreateTest()
 	print(testobj:Test())
 	print(testobj.Variable)
@@ -24,10 +24,10 @@ if SERVER then
 	print(testobj.Variable)
 
 	print(testobj.Name)
---]]
+]]
 
 	-- rapid iteration requires rapid solutions
-	--[[
+--[[
 	device = LCPUNative.CreateDevice(0x100000f0, 0x10)
 	device.a = 12
 	device.apple = {}
@@ -35,6 +35,10 @@ if SERVER then
 	--print(device)
 	--print(device.a)
 	--print(device.apple)
+
+	print("name property is " .. device.Name)
+	print("base property is " .. device.Base)
+	print("size property is " .. device.Size)
 
 function device:Clock() 
 	print("a")
@@ -71,5 +75,6 @@ end
 	cpu:Cycle();cpu:Cycle();cpu:Cycle();cpu:Cycle();
 	cpu:Cycle();cpu:Cycle();cpu:Cycle();cpu:Cycle();
 ]]
+
 	AddCSLuaFile("entities/gmod_lcpu_cpu.lua")
 end

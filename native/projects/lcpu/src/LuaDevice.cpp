@@ -1,6 +1,18 @@
 #include "LuaDevice.hpp"
 
-LUA_CLASS_BIND_VARIABLES_IMPLEMENT(LuaDevice);
+void LuaDevice::RegisterClass(GarrysMod::Lua::ILuaBase* LUA) {
+	RegisterClassStart(LUA);
+
+	RegisterGetter("Base", [](GarrysMod::Lua::ILuaBase* LUA) {
+		auto self = LuaDevice::FromLua(LUA, 1);
+		LUA->PushNumber(static_cast<double>(self->base));
+	});
+
+	RegisterGetter("Size", [](GarrysMod::Lua::ILuaBase* LUA) {
+		auto self = LuaDevice::FromLua(LUA, 1);
+		LUA->PushNumber(static_cast<double>(self->size));
+	});
+}
 
 bool LuaDevice::Clocked() const {
 	// no real good rationale for checking here,
@@ -10,15 +22,15 @@ bool LuaDevice::Clocked() const {
 
 void LuaDevice::Clock() {
 	// clang-format off
-	LuaState->ReferencePush(tableReference);
-		LuaState->GetField(-1,"Clock");
-			if(LuaState->GetType(-1) == GarrysMod::Lua::Type::Function) { 
-				LuaState->Push(-2); // 'self' argument
-				LuaState->Call(1, 0);
+	lua->ReferencePush(GetTableReference());
+		lua->GetField(-1,"Clock");
+			if(lua->GetType(-1) == GarrysMod::Lua::Type::Function) { 
+				lua->Push(-2); // 'self' argument
+				lua->Call(1, 0);
 			} else {
-				LuaState->Pop(); // pop the Clock function off the stack
+				lua->Pop(); // pop the Clock function off the stack
 			}
-	LuaState->Pop(); // pop the reference
+	lua->Pop(); // pop the reference
 	// clang-format off
 }
 
@@ -32,126 +44,53 @@ riscv::Address LuaDevice::Size() const {
 
 u32 LuaDevice::Peek(riscv::Address address) {
 	// clang-format off
-	LuaState->ReferencePush(tableReference);
-		LuaState->GetField(-1,"Peek");
-			if(LuaState->GetType(-1) == GarrysMod::Lua::Type::Function) { 
-				LuaState->Push(-2); // 'self' argument
-				LuaState->PushNumber(static_cast<double>(address));
-				LuaState->Call(2, 1);
+	lua->ReferencePush(GetTableReference());
+		lua->GetField(-1,"Peek");
+			if(lua->GetType(-1) == GarrysMod::Lua::Type::Function) { 
+				lua->Push(-2); // 'self' argument
+				lua->PushNumber(static_cast<double>(address));
+				lua->Call(2, 1);
 
-				auto result = static_cast<u32>(LuaState->GetNumber(-1));
-				LuaState->Pop(2); // pop result and the table off
+				auto result = static_cast<u32>(lua->GetNumber(-1));
+				lua->Pop(2); // pop result and the table off
 				return result;
 			} else {
-				LuaState->Pop(); // pop whatever Peek is off the stack
+				lua->Pop(); // pop whatever Peek is off the stack
 			}
-	LuaState->Pop(); // pop the table reference
+	lua->Pop(); // pop the table reference
 	// clang-format on
 	return 0xffffffff;
 }
 
 void LuaDevice::Poke(riscv::Address address, u32 value) {
 	// clang-format off
-	LuaState->ReferencePush(tableReference);
-		LuaState->GetField(-1,"Poke");
-			if(LuaState->GetType(-1) == GarrysMod::Lua::Type::Function) { 
-				LuaState->Push(-2); // 'self' argument
-				LuaState->PushNumber(static_cast<double>(address));
-				LuaState->PushNumber(static_cast<double>(value));
-				LuaState->Call(3, 0);
+	lua->ReferencePush(GetTableReference());
+		lua->GetField(-1,"Poke");
+			if(lua->GetType(-1) == GarrysMod::Lua::Type::Function) { 
+				lua->Push(-2); // 'self' argument
+				lua->PushNumber(static_cast<double>(address));
+				lua->PushNumber(static_cast<double>(value));
+				lua->Call(3, 0);
 			} else {
-				LuaState->Pop(); // pop whatever Peek is
+				lua->Pop(); // pop whatever Peek is
 			}
-	LuaState->Pop(); // pop the table reference
+	lua->Pop(); // pop the table reference
 	// clang-format on
 }
 
 void LuaDevice::Reset() {
 	// clang-format off
-	LuaState->ReferencePush(tableReference);
-		LuaState->GetField(-1,"Reset");
-		if(LuaState->GetType(-1) == GarrysMod::Lua::Type::Function) { 
-			LuaState->Push(-2); // 'self' argument
-			LuaState->Call(1, 0);
+	lua->ReferencePush(GetTableReference());
+		lua->GetField(-1,"Reset");
+		if(lua->GetType(-1) == GarrysMod::Lua::Type::Function) { 
+			lua->Push(-2); // 'self' argument
+			lua->Call(1, 0);
 		} else {
-			LuaState->Pop(); // pop whatever reset is
+			lua->Pop(); // pop whatever reset is
 		}
-	LuaState->Pop(); // pop the reference
+	lua->Pop(); // pop the reference
 	// clang-format on
 }
 
 LuaDevice::LuaDevice(riscv::Address base, riscv::Address size) : base(base), size(size) {
-}
-
-LuaDevice::~LuaDevice() {
-	// Free all refererences
-	if(tableReference == -1)
-		LuaState->ReferenceFree(tableReference);
-}
-
-LUA_MEMBER_FUNCTION_IMPLEMENT(LuaDevice, __index) {
-	auto self = LUA_CLASS_GET(LuaDevice)(1);
-	// lucore::LogInfo("metamethod __index call");
-
-	// TODO: before moving this to a shared lua object class thing
-	// and moving the CPU class to use this way of doing things
-	// I should probably try and like, add stuff to ensure native
-	// methods can be registered as well,,
-	LUA->ReferencePush(self->tableReference);
-	LUA->Push(2);
-	LUA->GetTable(-2);
-	return 1; // the value
-}
-
-LUA_MEMBER_FUNCTION_IMPLEMENT(LuaDevice, __newindex) {
-	auto self = LUA_CLASS_GET(LuaDevice)(1);
-	// lucore::LogInfo("metamethod __newindex call");
-
-	// Always push onto the table.
-	// TODO: This function
-	// should error on attempt to __newindex any native methods
-	// (when moved to a shared place)
-	LUA->ReferencePush(self->tableReference);
-	LUA->Push(2);
-	LUA->Push(3);
-	LUA->SetTable(-3);
-	LUA->Pop();
-	return 0;
-}
-
-void LuaDevice::Bind(GarrysMod::Lua::ILuaBase* LUA) {
-	// clang-format off
-	//LUA_CLASS_BIND_BEGIN(LuaDevice)
-	__lua_typeid = LUA->CreateMetaTable("LuaDevice");                                
-		LUA->PushSpecial(GarrysMod::Lua::SPECIAL_REG);                             
-			LUA->PushNumber(__lua_typeid);                                          
-			LUA->SetField(-2, "LuaDevice__typeid");                                          
-		LUA->Pop(); /* pop registry */                                             
-
-		LUA_SET_C_FUNCTION(__gc)
-		LUA_SET_C_FUNCTION(__index)
-		LUA_SET_C_FUNCTION(__newindex)
-	LUA_CLASS_BIND_END();
-	// clang-format on
-}
-
-void LuaDevice::Create(GarrysMod::Lua::ILuaBase* LUA, riscv::Address base, riscv::Address size) {
-	auto device = new LuaDevice(base, size);
-	device->LuaState = LUA;
-
-	LUA->CreateTable();
-	device->tableReference = LUA->ReferenceCreate();
-	LUA->Pop();
-
-	// push base/size properties for lua to have a looksee at !
-	// ideally these should be handled as metamethods in __index,
-	// but i don't quite feel like making gmod sol2 yet /shrug
-	LUA->ReferencePush(device->tableReference);
-	LUA->PushNumber(static_cast<double>(base));
-	LUA->SetField(-2, "Base");
-	LUA->PushNumber(static_cast<double>(base));
-	LUA->SetField(-2, "Size");
-	LUA->Pop();
-
-	LUA->PushUserType(device, __lua_typeid);
 }

@@ -3,15 +3,15 @@
 #include <riscv/Bus.hpp>
 
 #include "LuaHelpers.hpp"
+#include "LuaObject.hpp"
 
 /// A work-in-progress binding of [riscv::Bus::MmioDevice] to lua
-struct LuaDevice : public riscv::Bus::MmioDevice {
+struct LuaDevice : public riscv::Bus::MmioDevice, lcpu::lua::LuaObject<LuaDevice> {
 	/// Lua binding stuff
-	static void Bind(GarrysMod::Lua::ILuaBase* LUA);
-	static void Create(GarrysMod::Lua::ILuaBase* LUA, riscv::Address base, riscv::Address size);
+	constexpr static const char* Name() { return "LuaDevice"; }
+	static void RegisterClass(GarrysMod::Lua::ILuaBase* LUA);
 
-	~LuaDevice();
-
+	// [riscv::Bus::MmioDevice] implementation
 	bool Clocked() const override;
 	void Clock() override;
 	void Reset() override;
@@ -22,19 +22,12 @@ struct LuaDevice : public riscv::Bus::MmioDevice {
 	u32 Peek(riscv::Address address) override;
 	void Poke(riscv::Address address, u32 value) override;
 
-   private:
-	// class binding stuff
-	LUA_CLASS_BIND_VARIABLES(private);
-
-	LUA_MEMBER_FUNCTION(__index);
-	LUA_MEMBER_FUNCTION(__newindex); 
-
+   protected:
+	friend lcpu::lua::LuaObject<LuaDevice>;
 	LuaDevice(riscv::Address base, riscv::Address size);
+	~LuaDevice() = default;
 
+   private:
 	riscv::Address base {};
 	riscv::Address size {};
-	GarrysMod::Lua::ILuaBase* LuaState;
-
-	// this should be a common type tbh
-	int tableReference = -1;
 };
