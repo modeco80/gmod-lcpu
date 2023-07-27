@@ -10,21 +10,6 @@ if SERVER then
 		return
 	end
 
---[[
-	testobj = LCPUNative.CreateTest()
-	print(testobj:Test())
-	print(testobj.Variable)
-
-	testobj.MemberVariable = 32.9
-	print(testobj.MemberVariable)
-
-	testobj.Variable = 32.1 -- this should fial
-	testobj.Test = nil;
-
-	print(testobj.Variable)
-
-	print(testobj.Name)
-]]
 
 	-- rapid iteration requires rapid solutions
 --[[

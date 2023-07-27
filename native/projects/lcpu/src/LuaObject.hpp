@@ -1,6 +1,6 @@
 #pragma once
 
-//#include <functional>
+#include <unordered_map>
 
 #include "GarrysMod/Lua/Interface.h"
 #include "GarrysMod/Lua/LuaBase.h"
@@ -16,14 +16,8 @@ namespace lcpu::lua {
 		using ILuaFunc = int (*)(GarrysMod::Lua::ILuaBase*);
 		using ILuaVoidFunc = void (*)(GarrysMod::Lua::ILuaBase*);
 
-		//using CFuncStd = std::function<int(lua_State*)>;
-		//using ILuaFuncStd = std::function<int(GarrysMod::Lua::ILuaBase*)>;
-		//using ILuaVoidFuncStd = std::function<void(GarrysMod::Lua::ILuaBase*)>;
-
 		/// Register a C++ method.
-		static void RegisterMethod(const std::string& name, CFunc func) {
-			methods()[name] = func;
-		}
+		static void RegisterMethod(const std::string& name, CFunc func) { methods()[name] = func; }
 
 		/// Register a getter for a value to be read.
 		static void RegisterGetter(const std::string& name, ILuaVoidFunc func) { getters()[name] = func; }
@@ -65,7 +59,7 @@ namespace lcpu::lua {
 			// clang-format on
 		}
 
-		/// Register a metafunction. 
+		/// Register a metafunction.
 		/// Note that the following metafunctions are reserved by the implementation
 		/// of this object, and should not be overwritten:
 		///

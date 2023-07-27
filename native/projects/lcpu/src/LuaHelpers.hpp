@@ -4,7 +4,6 @@
 #include <GarrysMod/Lua/Interface.h>
 
 #include <lucore/Logger.hpp>
-#include <unordered_map>
 
 #include "GarrysMod/Lua/LuaBase.h"
 
@@ -29,44 +28,6 @@
 		return LUA->GetUserType<T>(stackPos, T::__lua_typeid); \
 	}
 
-// This class binding package always implements the __gc metamethod
-// to free any C++ object bound to Lua.
-
-// Declare required binding variables.
-#define LUA_CLASS_BIND_VARIABLES(ACCESS_LEVEL) \
-   public:                                     \
-	static int __lua_typeid;                   \
-	ACCESS_LEVEL:                              \
-	LUA_MEMBER_FUNCTION(__gc);
-
-// Implement required binding variables (typically in a .cpp file).
-#define LUA_CLASS_BIND_VARIABLES_IMPLEMENT(T)                                        \
-	int T::__lua_typeid = 0;                                                         \
-	LUA_MEMBER_FUNCTION_IMPLEMENT(T, __gc) {                                         \
-		LUA->CheckType(1, T::__lua_typeid);                                          \
-		auto self = LUA->GetUserType<T>(1, T::__lua_typeid);                         \
-		if(self != nullptr) { /* GetUserType returns nullptr on failure */           \
-			lucore::LogInfo("GCing {} object @ {:p}", #T, static_cast<void*>(self)); \
-			delete self;                                                             \
-		}                                                                            \
-		return 0;                                                                    \
-	}
-
-// Begin the Bind() method of a class. This just sets up boilerplate
-// and required things to setup a class.
-#define LUA_CLASS_BIND_BEGIN(T)                    \
-	T::__lua_typeid = LUA->CreateMetaTable(#T);    \
-	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_REG); \
-	LUA->PushNumber(T::__lua_typeid);              \
-	LUA->SetField(-2, #T "__typeid");              \
-	LUA->Pop(); /* pop registry */                 \
-	LUA->Push(-1);                                 \
-	LUA->SetField(-2, "__index");                  \
-	LUA_SET_C_FUNCTION(__gc)
-
-// End the Bind() method.
-#define LUA_CLASS_BIND_END() LUA->Pop();
-
 // Set a C function as a field.
 #define LUA_SET_C_FUNCTION(name) \
 	LUA->PushCFunction(name);    \
@@ -88,5 +49,5 @@ namespace lcpu::lua {
 			return {};
 		}
 	}
-	
+
 } // namespace lcpu::lua
