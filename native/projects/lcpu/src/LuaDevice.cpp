@@ -9,6 +9,7 @@ bool LuaDevice::Clocked() const {
 }
 
 void LuaDevice::Clock() {
+	// clang-format off
 	LuaState->ReferencePush(tableReference);
 		LuaState->GetField(-1,"Clock");
 			if(LuaState->GetType(-1) == GarrysMod::Lua::Type::Function) { 
@@ -18,6 +19,7 @@ void LuaDevice::Clock() {
 				LuaState->Pop(); // pop the Clock function off the stack
 			}
 	LuaState->Pop(); // pop the reference
+	// clang-format off
 }
 
 riscv::Address LuaDevice::Base() const {
@@ -29,15 +31,7 @@ riscv::Address LuaDevice::Size() const {
 }
 
 u32 LuaDevice::Peek(riscv::Address address) {
-	/*if(peekHandlerReference != -1) {
-		LuaState->ReferencePush(resetHandlerReference);
-		LuaState->PushNumber(static_cast<double>(address));
-		LuaState->Call(1, 1);
-		auto result = LuaState->GetNumber(-1);
-		LuaState->Pop();
-		return static_cast<u32>(result);
-	}*/
-
+	// clang-format off
 	LuaState->ReferencePush(tableReference);
 		LuaState->GetField(-1,"Peek");
 			if(LuaState->GetType(-1) == GarrysMod::Lua::Type::Function) { 
@@ -52,17 +46,12 @@ u32 LuaDevice::Peek(riscv::Address address) {
 				LuaState->Pop(); // pop whatever Peek is off the stack
 			}
 	LuaState->Pop(); // pop the table reference
+	// clang-format on
 	return 0xffffffff;
 }
 
 void LuaDevice::Poke(riscv::Address address, u32 value) {
-	/*if(pokeHandlerReference != -1) {
-		LuaState->ReferencePush(pokeHandlerReference);
-		LuaState->PushNumber(address);
-		LuaState->PushNumber(value);
-		LuaState->Call(2, 0);
-	}*/
-
+	// clang-format off
 	LuaState->ReferencePush(tableReference);
 		LuaState->GetField(-1,"Poke");
 			if(LuaState->GetType(-1) == GarrysMod::Lua::Type::Function) { 
@@ -74,14 +63,11 @@ void LuaDevice::Poke(riscv::Address address, u32 value) {
 				LuaState->Pop(); // pop whatever Peek is
 			}
 	LuaState->Pop(); // pop the table reference
+	// clang-format on
 }
 
 void LuaDevice::Reset() {
-	/*if(resetHandlerReference != -1) {
-		LuaState->ReferencePush(resetHandlerReference);
-		LuaState->Call(0, 0);
-	}*/
-
+	// clang-format off
 	LuaState->ReferencePush(tableReference);
 		LuaState->GetField(-1,"Reset");
 		if(LuaState->GetType(-1) == GarrysMod::Lua::Type::Function) { 
@@ -91,6 +77,7 @@ void LuaDevice::Reset() {
 			LuaState->Pop(); // pop whatever reset is
 		}
 	LuaState->Pop(); // pop the reference
+	// clang-format on
 }
 
 LuaDevice::LuaDevice(riscv::Address base, riscv::Address size) : base(base), size(size) {
@@ -104,8 +91,8 @@ LuaDevice::~LuaDevice() {
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaDevice, __index) {
 	auto self = LUA_CLASS_GET(LuaDevice)(1);
-	//lucore::LogInfo("metamethod __index call");
-	
+	// lucore::LogInfo("metamethod __index call");
+
 	// TODO: before moving this to a shared lua object class thing
 	// and moving the CPU class to use this way of doing things
 	// I should probably try and like, add stuff to ensure native
@@ -118,9 +105,9 @@ LUA_MEMBER_FUNCTION_IMPLEMENT(LuaDevice, __index) {
 
 LUA_MEMBER_FUNCTION_IMPLEMENT(LuaDevice, __newindex) {
 	auto self = LUA_CLASS_GET(LuaDevice)(1);
-	//lucore::LogInfo("metamethod __newindex call");
+	// lucore::LogInfo("metamethod __newindex call");
 
-	// Always push onto the table. 
+	// Always push onto the table.
 	// TODO: This function
 	// should error on attempt to __newindex any native methods
 	// (when moved to a shared place)
@@ -146,8 +133,6 @@ void LuaDevice::Bind(GarrysMod::Lua::ILuaBase* LUA) {
 		LUA_SET_C_FUNCTION(__newindex)
 	LUA_CLASS_BIND_END();
 	// clang-format on
-
-
 }
 
 void LuaDevice::Create(GarrysMod::Lua::ILuaBase* LUA, riscv::Address base, riscv::Address size) {
@@ -155,17 +140,17 @@ void LuaDevice::Create(GarrysMod::Lua::ILuaBase* LUA, riscv::Address base, riscv
 	device->LuaState = LUA;
 
 	LUA->CreateTable();
-		device->tableReference = LUA->ReferenceCreate();
+	device->tableReference = LUA->ReferenceCreate();
 	LUA->Pop();
 
 	// push base/size properties for lua to have a looksee at !
 	// ideally these should be handled as metamethods in __index,
 	// but i don't quite feel like making gmod sol2 yet /shrug
 	LUA->ReferencePush(device->tableReference);
-		LUA->PushNumber(static_cast<double>(base));
-		LUA->SetField(-2, "Base");
-		LUA->PushNumber(static_cast<double>(base));
-		LUA->SetField(-2, "Size");
+	LUA->PushNumber(static_cast<double>(base));
+	LUA->SetField(-2, "Base");
+	LUA->PushNumber(static_cast<double>(base));
+	LUA->SetField(-2, "Size");
 	LUA->Pop();
 
 	LUA->PushUserType(device, __lua_typeid);
