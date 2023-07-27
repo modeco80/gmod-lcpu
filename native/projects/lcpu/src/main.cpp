@@ -11,7 +11,7 @@ GMOD_MODULE_OPEN() {
 	lucore::Logger::The().AttachSink(lcpu::SourceSink::The());
 	lucore::LogInfo("LCPU Native Module! (ModuleVersion {})", LCPU_MODULE_VERSION);
 
-	GlobalsBind(LUA);
+	lcpu::GlobalsBind(LUA);
 	return 0;
 }
 

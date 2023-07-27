@@ -26,7 +26,7 @@ if SERVER then
 	print("size property is " .. device.Size)
 
 function device:Clock() 
-	print("a")
+	print(self.Base)
 end
 
 function device:Peek(address)
@@ -59,7 +59,7 @@ end
 	cpu:Cycle();cpu:Cycle();cpu:Cycle();cpu:Cycle();
 	cpu:Cycle();cpu:Cycle();cpu:Cycle();cpu:Cycle();
 	cpu:Cycle();cpu:Cycle();cpu:Cycle();cpu:Cycle();
-]]
+--]]
 
 	AddCSLuaFile("entities/gmod_lcpu_cpu.lua")
 end

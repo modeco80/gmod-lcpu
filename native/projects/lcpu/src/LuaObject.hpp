@@ -10,6 +10,9 @@ namespace lcpu::lua {
 
 	/// A CRTP-based class which allows binding C++ to Lua, in a
 	/// fairly sensible manner.
+	///
+	/// Classes backed by this class can have arbitrary properties
+	/// created by Lua (using a backing table created by this object).
 	template <class TImpl>
 	struct LuaObject {
 		using CFunc = GarrysMod::Lua::CFunc;
@@ -26,12 +29,15 @@ namespace lcpu::lua {
 		/// C++ registered value read-write.
 		static void RegisterSetter(const std::string& name, ILuaVoidFunc func) { setters()[name] = func; }
 
+		virtual void AfterLuaInit() {};
+
 		/// Create an instance of this type to give to Lua.
 		/// addl. arguments are forwarded to the C++ constructor
 		template <class... Args>
 		static void Create(GarrysMod::Lua::ILuaBase* LUA, Args&&... args) {
 			auto ptr = new TImpl(static_cast<Args&&>(args)...);
 			ptr->InitLuaStuff(LUA);
+			ptr->AfterLuaInit();
 			LUA->PushUserType(ptr, __lua_typeid);
 		}
 
@@ -85,14 +91,14 @@ namespace lcpu::lua {
 			LUA->CreateTable();
 			tableReference = LUA->ReferenceCreate();
 
-			// register some convinence things
+			// register some convinence getters
 			RegisterGetter("Name", [](GarrysMod::Lua::ILuaBase* LUA) { LUA->PushString(TImpl::Name()); });
 		}
 
 		int GetTableReference() { return tableReference; }
 
 		LuaObject() = default;
-		~LuaObject() {
+		virtual ~LuaObject() {
 			// free the table reference
 			if(tableReference != -1)
 				lua->ReferenceFree(tableReference);

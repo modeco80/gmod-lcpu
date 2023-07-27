@@ -1,4 +1,6 @@
-//! Helpers for lua binding
+//! Helpers for binding Lua and C++.
+//! If you want to bind a C++ class to Lua, see the
+//! [lcpu::lua::LuaObject<TImpl>] type in LuaObject.hpp
 #pragma once
 
 #include <GarrysMod/Lua/Interface.h>
@@ -19,14 +21,6 @@
 	}
 
 #define LUA_MEMBER_FUNCTION_IMPLEMENT(CLASS, FUNC) int CLASS::FUNC##__ImpStatic(GarrysMod::Lua::ILuaBase* LUA)
-
-// this synthesizes a lambda which takes the stack argument to get. this can actually also be
-// stored as a variable for later usage (... if you so desire?)
-#define LUA_CLASS_GET(T)                                       \
-	[LUA](int stackPos) {                                      \
-		LUA->CheckType(stackPos, T::__lua_typeid);             \
-		return LUA->GetUserType<T>(stackPos, T::__lua_typeid); \
-	}
 
 // Set a C function as a field.
 #define LUA_SET_C_FUNCTION(name) \
