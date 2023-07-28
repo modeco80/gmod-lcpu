@@ -1,0 +1,23 @@
+{
+	"Project": {
+		"Name": "test",
+
+		"Configurations": {
+			"Debug": {
+				"CCompileFlags": "-O0 ${BaseCCompileFlags}",
+				"CppCompileFlags": "-O0 ${BaseCppCompileFlags}"
+			},
+			"Release": {
+				"CCompileFlags": "-O2 ${BaseCCompileFlags}",
+				"CppCompileFlags": "-O2 ${BaseCppCompileFlags}",
+				"LinkerFlags": "-Wl,--gc-sections ${BaseLinkerFlags}"
+			}
+		},
+
+		"Sources": [
+			"binary.ld",
+			"start.S",
+			"main.c"
+		]
+	}
+}

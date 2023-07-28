@@ -22,50 +22,56 @@ This is basically the working ideas for the LCPU project.
 - Write assembly/C/C++ code using a tiny project system (source for them would go in server data folder ?)
 	- At the root of a project, a `project.json` file is expected to exist, with contents like:
 	```json
-		{
-			"project": {
-				// All configurations for a project.
-				"configurations": {
-					"debug": {
-						"CCompileFlags": "-O0 -g ${BaseCCompileFlags}",
-						"CppCompileFlags": "-O0 -g ${BaseCppCompileFlags}",
-						"LinkerScript": "binary.ld",
-					},
-					"release": {
-						"CCompileFlags": "-O2 ${BaseCCompileFlags}",
-						"CppCompileFlags": "-O2 ${BaseCppCompileFlags}",
-						"LinkerScript": "binary.ld",
-						"LinkerFlags": "-Wl,--gc-sections"
-					},
-				},
+	{
+		"Project": {
+			"Name": "test",
 
-				// Obviously you can use separate subdirectories;
-				// this is just a very very simple baremetal program.
-				"Sources": [
-					"startup.S",
-					"main.cpp"
-				]
-			}
+			// Define all build configurations here
+			"Configurations": {
+				"Debug": {
+					"CCompileFlags": "-O0 ${BaseCCompileFlags}",
+					"CppCompileFlags": "-O0 ${BaseCppCompileFlags}"
+				},
+				"Release": {
+					"CCompileFlags": "-O2 ${BaseCCompileFlags}",
+					"CppCompileFlags": "-O2 ${BaseCppCompileFlags}",
+					// If a variable is unset it will usually default to
+					// ${Base${VariableName}}
+					"LinkerFlags": "-Wl,--gc-sections ${BaseLinkerFlags}"
+				}
+			},
+
+			"Sources": [
+				"binary.ld",
+				"start.S",
+				"main.c"
+			]
 		}
+	}
 	```
 
 	- `BaseCCompileFlags` and `BaseCppCompileFlags` are defaulted to sane values for each language.
 
 	- This will be transpiled into a `Makefile` by the addon.
 		- A standalone tool will be provided and used for transpiling `project.json` to a `Makefile` (and maybe even passed into the container and transpiled there, to reduce the actions on the host to just the podman run?)
-		- which is then run with `make` in a temporary podman container which only has access to the source code for the project (and nothing else, besides riscv tools).
+		- which, when a Build is done in GMod; is then run with `make` in a temporary podman container which only has access to the source code for the project (and nothing else, besides riscv tools).
 			- Command line is probably something like `make CONFIG=${config}`
 		- the output binary will be stored alongside the source code on the server side, with a name like `${name}-${config}.bin`
-			- This file can then be selected for loading (without uploading from the client).
+			- This file can then be selected for loading (without needing to be uploaded from the client).
 
 
 - There is no conditional compilation in the `project.json` system
 	- All files in a project are always built by that project.
 
+- No notion of subprojects/build dependencies other than GCC generated dependencies
+	- This is meant to be simple for easy development in GMod. If you want complex build features you can export the project onto your own computer and use `lcpu_projgen` to generate Makefiles (which you can then maintain)
+
 - Text editor used to edit project source files
 	- Use the Wire editor? (we need wiremod anyways, and the text editor is.. OK I suppose.)
+		- Or I guess I could try getting Monaco to play nicely with DHTML
 
 - Some example projects?
+	- A simple bare metal "Hello World"
 	- I joke about it, but an RTOS would be really nice and a good stress test of the project system (for usage in "real" projects.)
 
 ## Moderation/administration tools

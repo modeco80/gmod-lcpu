@@ -3,5 +3,8 @@ build/
 module_build/
 native/projects/riscv/ref
 
+# for now
+native/projects/projgen
+
 .cache/
 .vscode/

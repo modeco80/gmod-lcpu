@@ -9,7 +9,14 @@ if SERVER then
 		return
 	end
 
-	--LCPUNative.EnableDebug()
+	LCPU = {};
+	LCPU.Devices = {};
 
+	--LCPUNative.EnableDebug()
+	
 	AddCSLuaFile("entities/gmod_lcpu_cpu.lua")
+
+	-- Serverside devices
+	include("lcpu/devices/uart.lua")
+	include("lcpu/devices/gmlua_test.lua")
 end
