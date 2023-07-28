@@ -1,5 +1,5 @@
-// a simple test program - this version would talk to a device
-// written in GLua
+// a simple test program - this version talks to a device
+// that is implemented in GLua thanks to the LCPU native addon
 #include <stdarg.h>
 #include <stdint.h>
 
@@ -14,7 +14,7 @@ uint32_t strlen(const char* str) {
 
 #define GLUA_DEVICE_BASE 0x11300000									   // base address of the lua test device
 #define GLUA_DEVICE_WORLDTIME *(volatile uint32_t*)GLUA_DEVICE_BASE	   // world time register (read only)
-#define GLUA_DEVICE_LUAREG *(volatile uint32_t*)(GLUA_DEVICE_BASE + 4) // lua register (read/write)
+#define GLUA_DEVICE_LUAREG *(volatile uint32_t*)(GLUA_DEVICE_BASE + 4) // lua number register (read/write)
 
 #define SYSCON *(volatile uint32_t*)0x11100000
 
@@ -74,6 +74,8 @@ void vprintf(const char* format, va_list val) {
 			case '%':
 				if(format[i + 1] == '%')
 					putc('%');
+				if(format[i+1] == '\0')
+					return;
 				switch(format[i + 1]) {
 					case 'i':
 					case 'd': {
@@ -98,6 +100,8 @@ void vprintf(const char* format, va_list val) {
 					default: putc(' '); break;
 				}
 				break;
+			case '\0': // band-aid fix.
+				return;
 			default: putc(format[i]); break;
 		}
 	}
@@ -111,7 +115,7 @@ void printf(const char* format, ...) {
 }
 
 void main() {
-	puts("fuck you garry I win");
+	puts("fuck you garry I win\n");
 
 	for(int i = 0; i < 8; ++i)
 		printf("GLUA_DEVICE_WORLDTIME reading says -> %d\n", GLUA_DEVICE_WORLDTIME);

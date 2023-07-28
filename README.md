@@ -16,9 +16,11 @@ See [this link](https://git.crustywindo.ws/modeco80/gmod-lcpu) for the actual de
 
 # Installation
 
+You will need Wiremod installed, either from the Workshop or cloned as a filesystem addon.
+
 This repository is set up to be a Filesystem Addon; therefore, workflows which clone repositories from Git and put them in addons/ should be able to work with the LCPU addon just fine.
 
-Preliminary installation steps:
+Preliminary installation steps (by hand):
 
 ```
 garrysmod/addons$ git clone --recursive https://git.crustywindo.ws/modeco80/gmod-lcpu.git lcpu
@@ -40,7 +42,7 @@ garrysmod/addons/lcpu$ [[ ! -d '../../lua/bin']] && mkdir -p ../../lua/bin && cp
 
 On Linux you can alternatively use the `./build_module.sh` script that will do all the build and installation steps automatically, once cloning the repository in the garrysmod/addons folder.
 
-Windows building is currently untested; I see no reason why it wouldn't work but it is not a platform I will focus on specifically.
+Windows building is currently untested; I see no reason why it wouldn't work.
 
 
 # Special Thanks

@@ -13,49 +13,68 @@ This is basically the working ideas for the LCPU project.
 
 - Upload a raw binary to execute, generated from any user tooling (goes into server data folder)
 	- Yes, this means you can run Linux in GMod. No, I'm not sorry.
-	- Or even an ELF? Would require less linker hell?
 
-## Integrated simple project workflow (WIP)
+## Integrated simple project workflow
 
 - Uses official RISC-V GCC toolchain
-	- Server operator can control root path of where they have installed it.
+	- In a podman container for jailing reasons?
 
 - Write assembly/C/C++ code using a tiny project system (source for them would go in server data folder ?)
-	- At the root of a project, a `project.json` file exists, with something like:
+	- At the root of a project, a `project.json` file is expected to exist, with contents like:
 	```json
 		{
 			"project": {
-				"cCompileFlags": "-O2",
-				"cppCompileFlags": "-O2 -fno-exceptions -fno-rtti",
+				// All configurations for a project.
+				"configurations": {
+					"debug": {
+						"CCompileFlags": "-O0 -g ${BaseCCompileFlags}",
+						"CppCompileFlags": "-O0 -g ${BaseCppCompileFlags}",
+						"LinkerScript": "binary.ld",
+					},
+					"release": {
+						"CCompileFlags": "-O2 ${BaseCCompileFlags}",
+						"CppCompileFlags": "-O2 ${BaseCppCompileFlags}",
+						"LinkerScript": "binary.ld",
+						"LinkerFlags": "-Wl,--gc-sections"
+					},
+				},
 
-				"sources": [
+				// Obviously you can use separate subdirectories;
+				// this is just a very very simple baremetal program.
+				"Sources": [
 					"startup.S",
 					"main.cpp"
 				]
-
 			}
 		}
 	```
 
-- No conditional compilation
-	- All files in a project are built by that project
+	- `BaseCCompileFlags` and `BaseCppCompileFlags` are defaulted to sane values for each language.
+
+	- This will be transpiled into a `Makefile` by the addon.
+		- A standalone tool will be provided and used for transpiling `project.json` to a `Makefile` (and maybe even passed into the container and transpiled there, to reduce the actions on the host to just the podman run?)
+		- which is then run with `make` in a temporary podman container which only has access to the source code for the project (and nothing else, besides riscv tools).
+			- Command line is probably something like `make CONFIG=${config}`
+		- the output binary will be stored alongside the source code on the server side, with a name like `${name}-${config}.bin`
+			- This file can then be selected for loading (without uploading from the client).
+
+
+- There is no conditional compilation in the `project.json` system
+	- All files in a project are always built by that project.
 
 - Text editor used to edit project source files
+	- Use the Wire editor? (we need wiremod anyways, and the text editor is.. OK I suppose.)
 
 - Some example projects?
 	- I joke about it, but an RTOS would be really nice and a good stress test of the project system (for usage in "real" projects.)
 
 ## Moderation/administration tools
 - Admin controlled per-user max RAM size (default 64mb)
-	- possibly override for "respectful" users and admins (admins probably wouldn't even count)?
 
 - Admin controlled per-user max LCPU entity count (default 8)
-	- Admins don't count to limits
 
-- Admin controled global (affects all placed LCPUs) scheduler cycle rate.
-	- Couldn't be faster than tickrate though or we might block source (and.. well, i dont think i have to explain)
-		- I decided not to go with the cpu thread stuff just because its annoying, and would require more state tracking. just ticking in lua using `ENT:Think` should be more than good enough (even if theres a risk of hitching source, but I don't think it's that big of a problem...)
-		- Project compilations however will definitely end up in a different thread though. Running them in the engine thread would undoubtably cause issues.
+- Admin controled global (affects all placed LCPUs) scheduler cycle rate/instruction count.
+		- default is 0.1/1024 instructions
 
 ## Addon interopability
 

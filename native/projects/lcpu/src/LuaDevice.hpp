@@ -6,7 +6,7 @@
 #include "LuaObject.hpp"
 
 namespace lcpu {
-	/// A work-in-progress binding of [riscv::Bus::MmioDevice] to lua
+	/// Binding of [riscv::Bus::MmioDevice] to Lua
 	struct LuaDevice : public riscv::Bus::MmioDevice, lcpu::lua::LuaObject<LuaDevice> {
 		/// Lua binding stuff
 		constexpr static const char* Name() { return "LuaDevice"; }

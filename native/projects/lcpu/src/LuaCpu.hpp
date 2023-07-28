@@ -5,7 +5,7 @@
 #include "LuaObject.hpp"
 
 namespace lcpu {
-	/// Bindings of [riscv::System] to Lua.
+	/// Binding of [riscv::System] to Lua.
 	struct LuaCpu : public lua::LuaObject<LuaCpu> {
 		/// Lua binding stuff
 		constexpr static const char* Name() { return "LuaCpu"; }
@@ -17,12 +17,12 @@ namespace lcpu {
 		~LuaCpu();
 
 	   private:
-		LUA_MEMBER_FUNCTION(PoweredOn);	   // Check if the CPU is powered on
-		LUA_MEMBER_FUNCTION(Cycle);		   // do a single cycle (called internally by LCPU entity)
-		LUA_MEMBER_FUNCTION(PowerOff);	   // power off and reset the LCPU
-		LUA_MEMBER_FUNCTION(PowerOn);	   // power on the LCPU
-		LUA_MEMBER_FUNCTION(Reset);		   // reset the LCPU
-		LUA_MEMBER_FUNCTION(AttachDevice); // attach a LuaDevice to this cpu
+		LUA_CLASS_FUNCTION_DECL(PoweredOn);	   // Check if the CPU is powered on
+		LUA_CLASS_FUNCTION_DECL(Cycle);		   // do a single cycle (called internally by LCPU entity)
+		LUA_CLASS_FUNCTION_DECL(PowerOff);	   // power off and reset the LCPU
+		LUA_CLASS_FUNCTION_DECL(PowerOn);	   // power on the LCPU
+		LUA_CLASS_FUNCTION_DECL(Reset);		   // reset the LCPU
+		LUA_CLASS_FUNCTION_DECL(AttachDevice); // attach a LuaDevice to this cpu
 
 		// member variables
 		riscv::System* system;

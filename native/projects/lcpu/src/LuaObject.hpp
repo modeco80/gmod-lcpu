@@ -4,6 +4,7 @@
 
 #include "GarrysMod/Lua/Interface.h"
 #include "GarrysMod/Lua/LuaBase.h"
+#include "GarrysMod/Lua/Types.h"
 #include "LuaHelpers.hpp"
 
 namespace lcpu::lua {
@@ -27,6 +28,8 @@ namespace lcpu::lua {
 
 		/// Register a setter. This can be used to make a
 		/// C++ registered value read-write.
+		/// Notes:
+		///	 - Stack index 3 will always be the value to be set.
 		static void RegisterSetter(const std::string& name, ILuaVoidFunc func) { setters()[name] = func; }
 
 		virtual void AfterLuaInit() {};
@@ -42,7 +45,6 @@ namespace lcpu::lua {
 		}
 
 		static TImpl* FromLua(GarrysMod::Lua::ILuaBase* LUA, int stackPos) {
-			LUA->CheckType(stackPos, __lua_typeid);
 			return LUA->GetUserType<TImpl>(stackPos, __lua_typeid);
 		}
 
@@ -95,11 +97,14 @@ namespace lcpu::lua {
 			RegisterGetter("Name", [](GarrysMod::Lua::ILuaBase* LUA) { LUA->PushString(TImpl::Name()); });
 		}
 
+		/// Get the user property table reference. This can be used
+		/// to fetch user properties from native C++ code.
 		int GetTableReference() { return tableReference; }
 
 		LuaObject() = default;
+
 		virtual ~LuaObject() {
-			// free the table reference
+			// free the table reference so it gets garbage collected too
 			if(tableReference != -1)
 				lua->ReferenceFree(tableReference);
 		}
@@ -108,12 +113,11 @@ namespace lcpu::lua {
 		GarrysMod::Lua::ILuaBase* lua;
 
 	   private:
-		// base metamethods
-		LUA_MEMBER_FUNCTION(__gc)
-		LUA_MEMBER_FUNCTION(__index)
-		LUA_MEMBER_FUNCTION(__newindex)
+		LUA_CLASS_FUNCTION_DECL(__gc)
+		LUA_CLASS_FUNCTION_DECL(__index)
+		LUA_CLASS_FUNCTION_DECL(__newindex)
 
-		// static stuff
+		/// Lua type ID for this wrapped class
 		static int __lua_typeid;
 
 		static auto& methods() {
@@ -139,19 +143,20 @@ namespace lcpu::lua {
 	int LuaObject<TImpl>::__lua_typeid = 0;
 
 	template <class TImpl>
-	LUA_MEMBER_FUNCTION_IMPLEMENT(LuaObject<TImpl>, __gc) {
+	LUA_CLASS_FUNCTION(LuaObject<TImpl>, __gc) {
 		auto self = FromLua(LUA, 1);
 		if(self != nullptr) {
-			lucore::LogInfo("GCing LuaObject {} @ {:p}", TImpl::Name(), static_cast<void*>(self));
+			lucore::LogDebug("GCing LuaObject {} @ {:p}", TImpl::Name(), static_cast<void*>(self));
 			delete self;
 		}
 		return 0;
 	}
 
 	template <class TImpl>
-	LUA_MEMBER_FUNCTION_IMPLEMENT(LuaObject<TImpl>, __index) {
+	LUA_CLASS_FUNCTION(LuaObject<TImpl>, __index) {
 		auto self = FromLua(LUA, 1);
 
+		// If the key is something we support,
 		if(LUA->GetType(2) == GarrysMod::Lua::Type::String) {
 			auto& methods = LuaObject::methods();
 			auto& getters = LuaObject::getters();
@@ -167,19 +172,22 @@ namespace lcpu::lua {
 				getters[key](LUA);
 				return 1;
 			}
+
+			lucore::LogDebug("LuaObject::__index({}) going to table", key);
 		}
 
-		// look up from the table
+		// Failing to look up an item is not fatal;
+		// we simply then look up the key in the backing table.
 		// clang-format off
-		LUA->ReferencePush(self->tableReference);
-			LUA->Push(2);
-		LUA->GetTable(-2);
+		LUA->ReferencePush(self->tableReference); // push table reference
+			LUA->Push(2); 				 // push key onto the stack
+		LUA->GetTable(-2); 				 // push table[key] onto the top of stack
 		// clang-format on
 		return 1;
 	}
 
 	template <class TImpl>
-	LUA_MEMBER_FUNCTION_IMPLEMENT(LuaObject<TImpl>, __newindex) {
+	LUA_CLASS_FUNCTION(LuaObject<TImpl>, __newindex) {
 		auto self = FromLua(LUA, 1);
 
 		if(LUA->GetType(2) == GarrysMod::Lua::Type::String) {
@@ -197,22 +205,21 @@ namespace lcpu::lua {
 				return 0;
 
 			if(setters.find(key) != setters.end()) {
-				// clang-format off
-				// Push the value to be written onto the top of the stack.
-				// This is mostly for ergonomic reasons.
-				LUA->Push(3); 
-					setters[key](LUA);
-				LUA->Pop();
+				setters[key](LUA);
 				return 0;
 			}
+
+
+			lucore::LogDebug("LuaObject::__newindex({}) going to table", key);
 		}
 
-		// push onto the table
+
+		// set the provided value onto the table
 		// clang-format off
-		LUA->ReferencePush(self->tableReference);
-			LUA->Push(2);
-			LUA->Push(3);
-			LUA->SetTable(-3);
+		LUA->ReferencePush(self->tableReference); // table
+			LUA->Push(2);				 // key
+			LUA->Push(3);				 // value
+			LUA->SetTable(-3);			 // table[key] = value
 		LUA->Pop();
 		// clang-format on
 		return 0;

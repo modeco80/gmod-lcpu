@@ -40,7 +40,7 @@ namespace lcpu {
 	}
 
 	riscv::Address LuaDevice::Size() const {
-		return base;
+		return size;
 	}
 
 	u32 LuaDevice::Peek(riscv::Address address) {
@@ -51,7 +51,6 @@ namespace lcpu {
 					lua->Push(-2); // 'self' argument
 					lua->PushNumber(static_cast<double>(address));
 					lua->Call(2, 1);
-
 					auto result = static_cast<u32>(lua->GetNumber(-1));
 					lua->Pop(2); // pop result and the table off
 					return result;

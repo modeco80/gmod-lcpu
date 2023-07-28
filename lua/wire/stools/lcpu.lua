@@ -12,13 +12,11 @@ if CLIENT then
 			text = "Create/Update LCPU"
 		},
 	}
-	--{ name = "right", text = "Open editor" },
-	--{ name = "reload", text = "Attach debugger" },
-	--{ name = "reload_shift", text = "Shift+Reload: Clear" },
 end
 
 WireToolSetup.BaseLang()
-WireToolSetup.SetupMax(7)
+WireToolSetup.SetupMax(8)
+
 TOOL.ClientConVar = {
 	model = "models/cheeze/wires/cpu.mdl",
 }
@@ -77,11 +75,22 @@ end
 
 if CLIENT then
 	function TOOL.BuildCPanel(panel)
-		local modelPanel = WireDermaExts.ModelSelect(panel, "lcpu_cpu_model", list.Get("Wire_gate_Models"), 2)
+		local modelPanel = WireDermaExts.ModelSelect(panel, "wire_lcpu_model", list.Get("Wire_gate_Models"), 2)
 		panel:AddControl(
 			"Label",
 			{
-				Text = ""
+				Text = "LCPU Options:"
+			}
+		)
+
+		panel:AddControl("CheckBox", {
+			Label = "Start powered on"
+		})
+
+		panel:AddControl(
+			"Label",
+			{
+				Text = "Wire Interface Device options:"
 			}
 		)
 	end

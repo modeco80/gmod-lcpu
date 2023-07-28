@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <riscv/Bus.hpp>
 #include <riscv/CPU.hpp>
+#include <lucore/Logger.hpp>
 
 namespace riscv {
 
@@ -34,10 +35,10 @@ namespace riscv {
 			// Refuse to overlap a device at its base address..
 			if(FindDeviceForAddress(upcasted->Base()))
 				return false;
+
 			// ... or have the end overlap the start of another device.
 			else if(FindDeviceForAddress(upcasted->Base() + upcasted->Size()))
 				return false;
-
 			mmio_devices[upcasted->Base()] = upcasted;
 		}
 
@@ -123,6 +124,8 @@ namespace riscv {
 	Bus::Device* Bus::FindDeviceForAddress(Address address) const {
 		auto try_find_device = [&](const auto& container, Address address) {
 			return std::find_if(container.begin(), container.end(), [&](const auto& pair) {
+				//lucore::LogInfo("0x{:08x} base, 0x{:08x} size -> {}", pair.first, pair.second->Size(), static_cast<void*>(pair.second));
+
 				return
 				// We can shorcut region checking if the requested addess matches base address.
 				pair.first == address ||
