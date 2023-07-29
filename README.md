@@ -25,7 +25,7 @@ Preliminary installation steps (for Linux):
 ```
 garrysmod/addons$ git clone --recursive https://git.crustywindo.ws/modeco80/gmod-lcpu.git lcpu
 garrysmod/addons$ cd lcpu
-garrysmod/addons/lcpu$ ./build_module.sh
+garrysmod/addons/lcpu$ ./build_module.sh [gameserver path]
 # Tada!
 ```
 

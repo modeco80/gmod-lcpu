@@ -3,10 +3,11 @@
 # Build the LCPU native module for both linux32 and linux64
 # and install it into the proper directory gmod wants native modules to be.
 
-set -x
-
 # where your game server is
-GS_PATH="/home/lily/gs/gmod"
+[[ "$1" == "" ]] && GS_PATH="/home/lily/gs/gmod"
+[[ ! "$1" == "" ]] && GS_PATH="$1"
+
+echo "building for $GS_PATH"
 
 # make the module build directory
 [[ ! -d "module_build" ]] && { 
