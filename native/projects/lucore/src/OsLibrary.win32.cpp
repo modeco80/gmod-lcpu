@@ -14,7 +14,7 @@ namespace lucore::detail {
 	}
 
 	void* OsLibrarySymbol(OsLibraryHandle dll, const char* symbolName) {
-		return GetProcAddressA(reinterpret_cast<HMODULE*>(dll), symbolName);
+		return GetProcAddressA(reinterpret_cast<HMODULE>(dll), symbolName);
 	}
 
 	void OsFreeLibrary(OsLibraryHandle handle) {

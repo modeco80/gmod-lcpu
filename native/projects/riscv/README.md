@@ -12,4 +12,4 @@ Depends on lucore.
 
 # Usage
 
-TBD (if this is moved to another repo). See the riscv_test_harness project.
+TBD (if this is moved to another repo). See the lcpu project
