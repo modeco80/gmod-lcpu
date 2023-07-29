@@ -25,7 +25,6 @@ namespace lcpu {
 			return 0;
 
 		self->poweredOn = false;
-		self->system->bus->Reset();
 		return 0;
 	}
 
@@ -70,7 +69,6 @@ namespace lcpu {
 		system = riscv::System::Create(memorySize);
 		system->OnPowerOff = [&]() {
 			poweredOn = false;
-			system->bus->Reset();
 		};
 
 		// lame test code. this WILL be removed, I just want this for a quick test

@@ -1,7 +1,27 @@
-// a simple test program - this version talks to a device
-// that is implemented in GLua thanks to the LCPU native addon
+// Test program for lcpu
 #include <stdarg.h>
 #include <stdint.h>
+
+// MMIO types
+
+/// This structure is at WIRE_BASE
+typedef struct {
+	uint32_t nrInputs;
+	uint32_t nrOutputs;
+} WireDevice_Header;
+
+#define WIRE_BASE 0x11310000
+#define WIRE_HEADER ((volatile WireDevice_Header*)WIRE_BASE)
+#define WIRE_IO_BASE WIRE_BASE + sizeof(WireDevice_Header)
+#define WIRE_OUTPUT_BASE WIRE_IO_BASE + (WIRE_HEADER->nrInputs * sizeof(uint32_t)) 
+#define WIRE_INPUT(i) *(volatile const uint32_t*)(WIRE_IO_BASE + (i * sizeof(uint32_t)))
+#define WIRE_OUTPUT(i) *(volatile uint32_t*)(WIRE_OUTPUT_BASE + (i * sizeof(uint32_t)))
+
+#define SYSCON *(volatile uint32_t*)0x11100000
+
+#define UART_BASE 0x10000000
+#define UART_DATA *(volatile uint32_t*)UART_BASE
+#define UART_STATUS UART_DATA
 
 uint32_t strlen(const char* str) {
 	if(!str)
@@ -12,15 +32,6 @@ uint32_t strlen(const char* str) {
 	return c - str;
 }
 
-#define GLUA_DEVICE_BASE 0x11300000									   // base address of the lua test device
-#define GLUA_DEVICE_WORLDTIME *(volatile uint32_t*)GLUA_DEVICE_BASE	   // world time register (read only)
-#define GLUA_DEVICE_LUAREG *(volatile uint32_t*)(GLUA_DEVICE_BASE + 4) // lua number register (read/write)
-
-#define SYSCON *(volatile uint32_t*)0x11100000
-
-#define UART_BASE 0x10000000
-#define UART_DATA *(volatile uint32_t*)UART_BASE
-#define UART_STATUS UART_DATA
 
 void putc(char c) {
 	UART_DATA = (uint32_t)c;
@@ -74,8 +85,6 @@ void vprintf(const char* format, va_list val) {
 			case '%':
 				if(format[i + 1] == '%')
 					putc('%');
-				if(format[i+1] == '\0')
-					return;
 				switch(format[i + 1]) {
 					case 'i':
 					case 'd': {
@@ -115,16 +124,21 @@ void printf(const char* format, ...) {
 }
 
 void main() {
-	puts("fuck you garry I win\n");
+	printf("Wire interface: %d inputs, %d outputs\n", WIRE_HEADER->nrInputs, WIRE_HEADER->nrOutputs);
 
-	for(int i = 0; i < 8; ++i)
-		printf("GLUA_DEVICE_WORLDTIME reading says -> %d\n", GLUA_DEVICE_WORLDTIME);
+	for(uint32_t i = 0; i < WIRE_HEADER->nrInputs; ++i)
+		printf("Wire input %d: value %d\n", i, WIRE_INPUT(i));
 
-	// try writing to it
-	GLUA_DEVICE_LUAREG = 0x1234;
+	for(uint32_t i = 0; i < WIRE_HEADER->nrOutputs; ++i) {
+		printf("Setting wire output %d\n", i);
+		WIRE_OUTPUT(i) = 10 + i;
+	}
 
-	for(int i = 0; i < 8; ++i)
-		printf("GLUA_DEVICE_LUAREG reading says -> %d\n", GLUA_DEVICE_LUAREG);
-
+#if 1
+	for(;;)
+		;
+	__builtin_unreachable();
+#else
 	SYSCON = 0x5555;
+#endif
 }

@@ -12,11 +12,11 @@ if SERVER then
 	LCPU = {};
 	LCPU.Devices = {};
 
+	-- Uncomment this to enable debug logging (useful for troubleshooting bugs)
 	--LCPUNative.EnableDebug()
-	
+
 	AddCSLuaFile("entities/gmod_lcpu_cpu.lua")
 
-	-- Serverside devices
+	-- Serverside devices (that don't depend on wiremod being loaded)
 	include("lcpu/devices/uart.lua")
-	include("lcpu/devices/gmlua_test.lua")
 end

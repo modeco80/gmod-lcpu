@@ -6,6 +6,10 @@ ENT.Author = "Lily <3"
 -- no more, this deeply uses native APIs
 if CLIENT then return end
 
+-- Include the devices which require Wiremod here
+-- (hacky, but /shrug)
+include("lcpu/devices/wire_interface.lua")
+
 -- TODO: serverside convars to control execution rate & cycle count
 
 function ENT:Initialize()
@@ -15,13 +19,11 @@ function ENT:Initialize()
 
 	-- CPU callbacks?
 	self.cpu = LCPUNative.CreateCPU(128 * 1024)
-
-	-- UART & GLua test device
 	self.uart = LCPU.Devices.UART(0x10000000)
-	self.test_device = LCPU.Devices.LuaTest()
+	self.wireInterface = LCPU.Devices.WireInterface(0x11310000, self, 8, 8)
 
 	self.cpu:AttachDevice(self.uart)
-	self.cpu:AttachDevice(self.test_device)
+	self.cpu:AttachDevice(self.wireInterface)
 
 	self:SetOverlayText("hi :)")
 end
@@ -29,9 +31,13 @@ end
 function ENT:Think()
 	-- Avoid running if the cpu is not powered on
 	if not self.cpu:PoweredOn() then return end
+	self.cpu:Cycle()
 	-- Even though this is gated by tickrate I'm just trying to be nice here
 	self:NextThink(CurTime() + 0.1)
-	self.cpu:Cycle()
+end
+
+function ENT:Reset()
+	self.cpu:Reset()
 end
 
 function ENT:PowerOn()

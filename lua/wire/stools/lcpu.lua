@@ -49,6 +49,12 @@ if SERVER then
 	end
 
 	function TOOL:LeftClick_Update(trace)
+		-- power on (TODO)
+		if trace.Entity ~= nil then
+			trace.Entity:Reset()
+			trace.Entity:PowerOn()
+		end
+		return true
 	end
 
 	function TOOL:MakeEnt(ply, model, Ang, trace)
@@ -62,7 +68,7 @@ if SERVER then
 			}
 		)
 
-		self:LeftClick_Update(trace)
+		--self:LeftClick_Update(trace)
 
 		return ent
 	end
