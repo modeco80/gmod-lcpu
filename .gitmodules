@@ -2,3 +2,6 @@
 	path = native/projects/lcpu/third_party/gmod_headers
 	url = https://github.com/Facepunch/gmod-module-base
 	branch = development
+[submodule "native/projects/projgen/third_party/daw_json_link"]
+	path = native/projects/projgen/third_party/daw_json_link
+	url = https://github.com/beached/daw_json_link

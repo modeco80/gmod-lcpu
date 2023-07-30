@@ -28,8 +28,9 @@ cmake_build() {
 }
 
 build_and_place() {
-	cmake_gen linux32 --toolchain $PWD/native/cmake/linux32-toolchain.cmake
-	cmake_gen linux64
+	# don't build utilities; they're only needed by the oci image
+	cmake_gen linux32 --toolchain $PWD/native/cmake/linux32-toolchain.cmake -DLCPU_BUILD_UTILITIES=OFF
+	cmake_gen linux64 -DLCPU_BUILD_UTILITIES=OFF
 	cmake_build linux32
 	cmake_build linux64
 

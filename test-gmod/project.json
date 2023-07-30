@@ -1,23 +1,22 @@
 {
-	"Project": {
-		"Name": "test",
+	"Name": "test",
 
-		"Configurations": {
-			"Debug": {
-				"CCompileFlags": "-O0 ${BaseCCompileFlags}",
-				"CppCompileFlags": "-O0 ${BaseCppCompileFlags}"
-			},
-			"Release": {
-				"CCompileFlags": "-O2 ${BaseCCompileFlags}",
-				"CppCompileFlags": "-O2 ${BaseCppCompileFlags}",
-				"LinkerFlags": "-Wl,--gc-sections ${BaseLinkerFlags}"
-			}
+	"Configurations": {
+		"Debug": {
+			"CCompileFlags": "-O0",
+			"CppCompileFlags": "-O0",
+			"LinkerFlags": ""
 		},
+		"Release": {
+			"CCompileFlags": "-O2",
+			"CppCompileFlags": "-O2",
+			"LinkerFlags": "-Wl,--gc-sections"
+		}
+	},
 
-		"Sources": [
-			"binary.ld",
-			"start.S",
-			"main.c"
-		]
-	}
+	"Sources": [
+		"binary.ld",
+		"start.S",
+		"main.c"
+	]
 }

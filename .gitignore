@@ -1,10 +1,6 @@
 build/
 # this one is created by the build script
 module_build/
-native/projects/riscv/ref
-
-# for now
-native/projects/projgen
 
 .cache/
 .vscode/
