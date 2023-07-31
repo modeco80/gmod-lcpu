@@ -11,7 +11,7 @@ This is basically the working ideas for the LCPU project.
 
 ## Code upload
 
-- Upload a raw binary to execute, generated from any user tooling (goes into server `data/lcpu/users/[steamid]/`)
+- Upload a raw binary to execute, generated from any user tooling (goes into the server `data/lcpu/users/[steamid]/`)
 	- Yes, this means you can run Linux in GMod. No, I'm not sorry.
 
 ## Integrated simple project workflow (WIP, not in the addon yet)
@@ -23,56 +23,47 @@ This is basically the working ideas for the LCPU project.
 	- At the root of a project, a `project.json` file is expected to exist, with contents like:
 	```json
 	{
-		"Project": {
-			"Name": "test",
+		"Name": "test",
 
-			// Define all build configurations here
-			"Configurations": {
-				"Debug": {
-					"CCompileFlags": "-O0 ${BaseCCompileFlags}",
-					"CppCompileFlags": "-O0 ${BaseCppCompileFlags}"
-				},
-				"Release": {
-					"CCompileFlags": "-O2 ${BaseCCompileFlags}",
-					"CppCompileFlags": "-O2 ${BaseCppCompileFlags}",
-					// If a variable is unset it will usually default to
-					// ${Base${VariableName}}
-					"LinkerFlags": "-Wl,--gc-sections ${BaseLinkerFlags}"
-				}
+		"Configurations": {
+			"Debug": {
+				"CCompileFlags": "-O0",
+				"CppCompileFlags": "-O0",
+				"LinkerFlags": ""
 			},
+			"Release": {
+				"CCompileFlags": "-O2",
+				"CppCompileFlags": "-O2",
+				"LinkerFlags": "-Wl,--gc-sections"
+			}
+		},
 
-			"Sources": [
-				"binary.ld",
-				"start.S",
-				"main.c"
-			]
-		}
+		"Sources": [
+			"binary.ld",
+			"start.S",
+			"main.c"
+		]
 	}
 	```
-
-	- `BaseCCompileFlags` and `BaseCppCompileFlags` are defaulted to sane values for each language.
-
-	- This will be transpiled into a `Makefile` by the addon.
+	- This will be transpiled into a `Makefile` when built.
 		- A standalone tool will be provided and used for transpiling `project.json` to a `Makefile` (and maybe even built into the container and transpiled there, to reduce the actions on the host to just the podman run?)
-		- which, when a Build is done in GMod; is then run with `make` in a temporary podman container which only has access to the source code folder for the project (and nothing else, besides riscv tools which are in the image).
-			- Command line is probably something like `make CONFIG=${config}`
-		- the output binary will be stored alongside the source code on the server side, with a name like `${name}-${config}.bin`
+		- which, when a Build is requested in GMod; is then run with `make` in a temporary podman container which only has access to the source code folder for the project (and nothing else, besides riscv tools which are in the image).
+			- Command line is probably something like `podman run localhost/lcpu-build:latest -v /project:[host project dir] make CONFIG=${config}`
+		- the output binary will be stored alongside the source code on the server side, with a name like `${name}_${config}.bin`
 			- This file can then be selected for loading (without needing to be uploaded from the client).
 
 
 - There is no conditional compilation in the `project.json` system
-	- All files in a project are always built by that project.
 
 - No notion of subprojects/build dependencies
-	- This is meant to be simple for easy development in GMod. If you want complex build features you can export the project onto your own computer and use `lcpu_projgen` to generate Makefiles (which you can then maintain)
 
-- Text editor used to edit project source files
+- Text editor used to edit project source files in GMod
 	- Use the Wire editor? (we need wiremod anyways, and the text editor is.. OK I suppose.)
 		- Or: https://github.com/Metastruct/gmod-monaco
 			- https://github.com/JustMrPhoenix/Noir/tree/master
 
 - Some example projects?
-	- A simple bare metal "Hello World"
+	- A simple bare metal "Hello World" using the SDK headers
 	- I joke about it, but an RTOS would be really nice and a good stress test of the project system (for usage in "real" projects.)
 
 ## Moderation/administration tools

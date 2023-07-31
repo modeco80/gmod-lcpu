@@ -1,3 +1,7 @@
+#pragma once
+
+#include <daw/json/daw_json_link.h>
+
 #include <cstdio>
 #include <filesystem>
 #include <memory>
@@ -7,13 +11,13 @@ namespace fs = std::filesystem;
 
 namespace projgen::util {
 
-	using unique_file_ptr = std::unique_ptr<std::FILE, decltype(&std::fclose)>;
+	using UniqueFilePtr = std::unique_ptr<std::FILE, decltype(&std::fclose)>;
 
-	unique_file_ptr UniqueFopen(std::string_view path, std::string_view mode) {
-		return unique_file_ptr(std::fopen(path.data(), mode.data()), &std::fclose);
+	inline UniqueFilePtr UniqueFopen(std::string_view path, std::string_view mode) {
+		return UniqueFilePtr(std::fopen(path.data(), mode.data()), &std::fclose);
 	}
 
-	std::string ReadFileAsString(const fs::path& path) {
+	inline std::string ReadFileAsString(const fs::path& path) {
 		auto file = UniqueFopen(path.string(), "r");
 		std::string data;
 		if(file) {
@@ -25,6 +29,12 @@ namespace projgen::util {
 			std::fread(data.data(), 1, len, file.get());
 		}
 		return data;
+	}
+
+	template <class T>
+	inline T ParseJsonFromFile(const fs::path& path) {
+		auto data = projgen::util::ReadFileAsString(path);
+		return daw::json::from_json<T>(data);
 	}
 
 } // namespace projgen::util

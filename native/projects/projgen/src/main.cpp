@@ -1,89 +1,87 @@
 //! Main for the LCPU project generator
 
+#include <filesystem>
+#include <lucore/Assert.hpp>
 #include <lucore/Logger.hpp>
 #include <lucore/StdoutSink.hpp>
 #include <unordered_map>
 
 #include "BaseConfig.hpp"
 #include "FsUtils.hpp"
+#include "Makefile.hpp"
 #include "Project.hpp"
 
-template <class T>
-T ParseJsonFromFile(const fs::path& path) {
-	auto data = projgen::util::ReadFileAsString(path);
-	return daw::json::from_json<T>(data);
+// TODO:
+// Once there's better C++23 ranges support, this can/should be replaced with:
+// (objects | views::join_with(' ')
+//          | std::ranges::to<std::string>())
+// I want better ranges support in gcc and clang, this already works in MSVC :(
+inline auto join(const std::vector<std::string>& values, const std::string_view seperator = " ") {
+	auto string = std::string {};
+	for(auto& value : values)
+		string += std::format("{}{}", value, seperator);
+	return string;
 }
-
-// this describes a source file
-struct SourceFile {
-	enum class Type {
-		Invalid,	   // invalid file
-		AsmSourceFile, // Assembly source file
-		CSourceFile,   // C source code
-		CppSourceFile, // C++ source code
-		LinkerScript,  // prepended to linker flags with a -T (only one can exist in a project)
-	};
-
-	static constexpr Type TypeFromExtension(std::string_view extension) {
-		if(extension == "s" || extension == "S")
-			return Type::AsmSourceFile;
-
-		if(extension == "c")
-			return Type::CSourceFile;
-		if(extension == "cpp" || extension == "cc")
-			return Type::CppSourceFile;
-		if(extension == "ld")
-			return Type::LinkerScript;
-
-		return Type::Invalid;
-	}
-
-	explicit SourceFile(const std::string& filename) : filename(filename) {
-		if(auto pos = filename.rfind('.'); pos != std::string::npos) {
-			type = TypeFromExtension(filename.substr(pos + 1));
-		} else {
-			type = Type::Invalid;
-		}
-	}
-
-	static std::vector<SourceFile> MakeArray(const std::vector<std::string>& filenames) {
-		auto vec = std::vector<SourceFile>();
-		vec.reserve(filenames.size());
-
-		for(auto& filename : filenames)
-			vec.emplace_back(filename);
-
-		return vec;
-	}
-
-	Type type;
-	std::string filename;
-};
 
 int main(int argc, char** argv) {
 	lucore::LoggerAttachStdout();
-
-	lucore::LogInfo("LCPU project generator!");
+	lucore::LogInfo("LCPU project generator");
 
 	auto project_json_path = (fs::current_path() / "project.json");
 
 	if(!fs::exists(project_json_path)) {
-		lucore::LogFatal("The directory \"{}\" does not seem like it's a project to me", fs::current_path().string());
+		lucore::LogFatal("The directory \"{}\" does not seem like it's a LCPU project to me", fs::current_path().string());
 		return 1;
 	}
 
 	try {
-		auto project = ParseJsonFromFile<projgen::Project>(project_json_path);
+		auto project = projgen::util::ParseJsonFromFile<projgen::Project>(project_json_path);
 
-		for(auto& pair : project.configurations) {
-			std::printf("%s: %s %s %s\n", pair.first.c_str(), pair.second.cCompileFlags.c_str(), pair.second.cppCompileFlags.c_str(),
-						pair.second.linkerFlags.value_or(PROJGEN_BASE_LD_FLAGS).c_str());
-		}
+		lucore::LogInfo("Generating Makefile for project \"{}\".", project.name);
 
-		auto sourceFiles = SourceFile::MakeArray(project.sourceFileNames);
+		auto sourceFiles = projgen::SourceFile::MakeArray(fs::current_path(), project.sourceFileNames);
+		auto objects = std::vector<std::string> {};
+		bool foundLdScript = false;
 
 		for(auto& source : sourceFiles) {
-			std::printf("%s -> %d\n", source.filename.c_str(), source.type);
+			LUCORE_CHECK(source.type != projgen::SourceFile::Type::Invalid,
+						 "Source file {} with Invalid type in source files. Refusing to generate project", source.path.string());
+
+			if(source.type == projgen::SourceFile::Type::LinkerScript) {
+				LUCORE_CHECK(!foundLdScript, "Project invalid; has more than 1 .ld script file");
+				foundLdScript = true;
+				for(auto& kv : project.configurations) {
+					if(kv.second.linkerFlags.has_value()) {
+						kv.second.linkerFlags = std::format("-T {} {}", source.path.string(), *kv.second.linkerFlags);
+					} else {
+						kv.second.linkerFlags = std::format("-T {}", source.path.string());
+					}
+				}
+				continue;
+			}
+
+			objects.push_back(std::format("obj/$(CONFIG)/{}", source.path.replace_extension(".o").string()));
+		}
+
+		projgen::make::MakefileWriter writer(fs::current_path());
+
+		auto generators = std::vector<std::unique_ptr<projgen::make::MakefileGeneratable>> {};
+		generators.emplace_back(new projgen::make::MakefileGlobalVariables(project.name, join(objects)));
+		generators.emplace_back(new projgen::make::MakefileConfiguration(project.configurations));
+		generators.emplace_back(new projgen::make::MakefileAllRule());
+		generators.emplace_back(new projgen::make::MakefileCleanRule());
+		generators.emplace_back(new projgen::make::MakefileObjDirRule());
+		generators.emplace_back(new projgen::make::MakefileAsmRule());
+		generators.emplace_back(new projgen::make::MakefileCRule());
+		generators.emplace_back(new projgen::make::MakefileCXXRule());
+		generators.emplace_back(new projgen::make::MakefileFlatBinaryRule());
+		generators.emplace_back(new projgen::make::MakefileLinkRule());
+
+		if(!writer.Write(generators)) {
+			lucore::LogError("Could not generate project");
+			return 1;
+		} else {
+			lucore::LogInfo("Generated Makefile \"{}\".", (fs::current_path() / "Makefile").string());
 		}
 
 	} catch(daw::json::json_exception& ex) {

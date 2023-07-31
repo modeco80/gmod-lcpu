@@ -4,3 +4,9 @@ module_build/
 
 .cache/
 .vscode/
+
+# generated products of the GMOD test program
+test-gmod/Makefile
+test-gmod/obj
+test-gmod/*.elf
+test-gmod/*.bin
