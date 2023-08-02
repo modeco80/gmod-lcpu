@@ -16,7 +16,7 @@ namespace lucore {
 		}
 	} // namespace
 
-	Library* Library::OpenExisting(std::string_view dllname) {
+	Unique<Library> Library::OpenExisting(std::string_view dllname) {
 		auto name = FormatLibraryName(dllname);
 		if(!detail::OsLibraryLoaded(name.c_str())) {
 #ifndef _WIN32
@@ -29,7 +29,7 @@ namespace lucore {
 #endif
 		}
 
-		return new Library(detail::OsOpenLibrary(name.c_str()));
+		return Unique<Library>(new Library(detail::OsOpenLibrary(name.c_str())));
 	}
 
 	bool Library::Loaded(std::string_view dllname) {

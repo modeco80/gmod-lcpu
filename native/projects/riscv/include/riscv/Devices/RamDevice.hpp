@@ -37,6 +37,7 @@ namespace riscv::devices {
 
 		Address memoryBase {};
 
+		// TODO: convert to Unique<u8[]>
 		u8* memory {};
 		usize memorySize {};
 	};

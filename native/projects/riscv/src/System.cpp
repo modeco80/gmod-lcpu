@@ -2,41 +2,30 @@
 
 namespace riscv {
 
-	System* System::Create(Address ramSize) {
-		auto* system = new System;
+	lucore::Unique<System> System::Create(Address ramSize) {
+		auto system = std::make_unique<System>();
 
 		// create all the devices we require.
-		system->bus = new Bus();
-		system->cpu = new CPU();
-		system->ram = new devices::RamDevice(0x80000000, ramSize);
-		system->clnt = new devices::ClntDevice();
-		system->syscon = new devices::SysconDevice(system);
+		system->bus = std::make_unique<Bus>();
+		system->cpu = std::make_unique<CPU>();
+		system->ram = std::make_unique<devices::RamDevice>(0x80000000, ramSize);
+		system->clnt = std::make_unique<devices::ClntDevice>();
+		system->syscon = std::make_unique<devices::SysconDevice>(system.get());
 
 		// attach everything into the bus
-		if(!system->bus->AttachDevice(system->cpu))
+		if(!system->bus->AttachDevice(system->cpu.get()))
 			return nullptr;
-		if(!system->bus->AttachDevice(system->clnt))
+		if(!system->bus->AttachDevice(system->clnt.get()))
 			return nullptr;
-		if(!system->bus->AttachDevice(system->syscon))
+		if(!system->bus->AttachDevice(system->syscon.get()))
 			return nullptr;
-		if(!system->bus->AttachDevice(system->ram))
+		if(!system->bus->AttachDevice(system->ram.get()))
 			return nullptr;
 
 		// reset the bus and all devices on it
 		system->bus->Reset();
 
 		return system;
-	}
-
-	System::~System() {
-		delete cpu;
-		delete bus;
-
-		// delete our devices
-		// externally bound devices should clean themselves up
-		delete clnt;
-		delete syscon;
-		delete ram;
 	}
 
 	void System::Step() {

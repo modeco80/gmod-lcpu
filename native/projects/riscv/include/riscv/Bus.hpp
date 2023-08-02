@@ -109,6 +109,7 @@ namespace riscv {
 		///
 		/// Note that once this function is called (and the device is successfully added),
 		/// the object pointed to by [device] should last at least as long as the bus.
+		/// The bus does not own objects attached to it.
 		///
 		/// # Returns
 		/// This function returns true if the device was able to be put on the bus.

@@ -5,7 +5,7 @@
 #include <lucore/Types.hpp>
 
 namespace tier0 {
-	lucore::Library* library = nullptr;
+	lucore::Unique<lucore::Library> library = nullptr;
 
 	using Msg_t = void (*)(const char*, ...);
 	Msg_t Msg {};
@@ -65,7 +65,8 @@ namespace lcpu {
 	}
 
 	SourceSink::~SourceSink() {
-		delete tier0::library;
+		// Unique<T> will do the right thing for us anyways but /shrug
+		tier0::library.reset();
 	}
 
 	void SourceSink::OutputMessage(const lucore::Logger::MessageData& data) {

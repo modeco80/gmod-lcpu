@@ -14,7 +14,6 @@ namespace lcpu {
 	   protected:
 		friend struct lua::LuaObject<LuaCpu>;
 		LuaCpu(u32 memorySize);
-		~LuaCpu();
 
 	   private:
 		LUA_CLASS_FUNCTION_DECL(PoweredOn);	   // Check if the CPU is powered on
@@ -25,7 +24,7 @@ namespace lcpu {
 		LUA_CLASS_FUNCTION_DECL(AttachDevice); // attach a LuaDevice to this cpu
 
 		// member variables
-		riscv::System* system;
+		lucore::Unique<riscv::System> system;
 		bool poweredOn;
 	};
 

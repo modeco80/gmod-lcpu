@@ -26,7 +26,6 @@ namespace lcpu {
 	   protected:
 		friend lcpu::lua::LuaObject<LuaDevice>;
 		LuaDevice(riscv::Address base, riscv::Address size);
-		~LuaDevice() = default;
 
 		void AfterLuaInit() override;
 

@@ -11,22 +11,23 @@ namespace riscv {
 	struct System {
 		/// Create a basic system with the basic periphials created.
 		/// All other periphials should be managed by the creator of this System
-		static System* Create(Address ramSize);
-
-		~System();
+		static lucore::Unique<System> Create(Address ramSize);
 
 		void Step();
 
 		std::function<void()> OnPowerOff;
 		std::function<void()> OnReboot;
 
-		Bus* bus;
+		lucore::Unique<Bus> bus;
 
 		// Required devices.
-		CPU* cpu;
-		devices::RamDevice* ram;
-		devices::SysconDevice* syscon;
-		devices::ClntDevice* clnt;
+		lucore::Unique<CPU> cpu;
+		lucore::Unique<devices::RamDevice> ram;
+		lucore::Unique<devices::SysconDevice> syscon;
+		lucore::Unique<devices::ClntDevice> clnt;
+
+		// call this and you get the door
+		System() = default;
 
 	   private:
 		friend struct devices::SysconDevice;
@@ -34,7 +35,6 @@ namespace riscv {
 		void SysconPowerOff();
 		void SysconReboot();
 
-		System() = default;
 	};
 
 } // namespace riscv

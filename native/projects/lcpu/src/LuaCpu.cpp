@@ -83,8 +83,4 @@ namespace lcpu {
 		}
 	}
 
-	LuaCpu::~LuaCpu() {
-		delete system;
-	}
-
 } // namespace lcpu

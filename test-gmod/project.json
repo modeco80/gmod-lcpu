@@ -4,8 +4,7 @@
 	"Configurations": {
 		"Debug": {
 			"CCompileFlags": "-O0",
-			"CppCompileFlags": "-O0",
-			"LinkerFlags": ""
+			"CppCompileFlags": "-O0"
 		},
 		"Release": {
 			"CCompileFlags": "-O2",

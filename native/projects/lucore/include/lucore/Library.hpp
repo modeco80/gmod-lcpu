@@ -1,5 +1,6 @@
 #pragma once
 
+#include <lucore/Types.hpp>
 #include <string_view>
 
 namespace lucore {
@@ -8,7 +9,7 @@ namespace lucore {
 		using Handle = void*;
 
 		/// Open an already loaded library
-		static Library* OpenExisting(std::string_view dllname);
+		static Unique<Library> OpenExisting(std::string_view dllname);
 
 		/// Query if [dllname] is loaded in the process.
 		static bool Loaded(std::string_view dllname);
@@ -21,8 +22,9 @@ namespace lucore {
 		}
 
 	   private:
-		void* SymbolImpl(const char* symbol);
 		constexpr explicit Library(Handle handle) : handle(handle) {}
+
+		void* SymbolImpl(const char* symbol);
 		Handle handle {};
 	};
 
