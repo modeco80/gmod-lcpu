@@ -6,6 +6,7 @@
 #include "GarrysMod/Lua/LuaBase.h"
 #include "GarrysMod/Lua/Types.h"
 #include "LuaHelpers.hpp"
+#include "lucore/Assert.hpp"
 
 namespace lcpu::lua {
 
@@ -45,7 +46,9 @@ namespace lcpu::lua {
 		}
 
 		static TImpl* FromLua(GarrysMod::Lua::ILuaBase* LUA, int stackPos) {
-			return LUA->GetUserType<TImpl>(stackPos, __lua_typeid);
+			if(auto ptr = LUA->GetUserType<TImpl>(stackPos, __lua_typeid); ptr)
+				return ptr;
+			return nullptr;
 		}
 
 	   protected:
@@ -76,6 +79,10 @@ namespace lcpu::lua {
 		/// - __newindex
 		///
 		static void RegisterMetaFunction(GarrysMod::Lua::ILuaBase* LUA, const std::string& name, CFunc func) {
+			LUCORE_CHECK(name != "__gc", "Attempting to overwrite __gc metamethod");
+			LUCORE_CHECK(name != "__index", "Attempting to overwrite __index metamethod");
+			LUCORE_CHECK(name != "__newindex", "Attempting to overwrite __newindex metamethod");
+
 			// clang-format off
 			LUA->PushMetaTable(__lua_typeid);
 				LUA->PushCFunction(func);
@@ -155,8 +162,7 @@ namespace lcpu::lua {
 	template <class TImpl>
 	LUA_CLASS_FUNCTION(LuaObject<TImpl>, __index) {
 		auto self = FromLua(LUA, 1);
-
-		// If the key is something we support,
+		
 		if(LUA->GetType(2) == GarrysMod::Lua::Type::String) {
 			auto& methods = LuaObject::methods();
 			auto& getters = LuaObject::getters();
@@ -172,8 +178,6 @@ namespace lcpu::lua {
 				getters[key](LUA);
 				return 1;
 			}
-
-			lucore::LogDebug("LuaObject::__index({}) going to table", key);
 		}
 
 		// Failing to look up an item is not fatal;
@@ -208,11 +212,7 @@ namespace lcpu::lua {
 				setters[key](LUA);
 				return 0;
 			}
-
-
-			lucore::LogDebug("LuaObject::__newindex({}) going to table", key);
 		}
-
 
 		// set the provided value onto the table
 		// clang-format off

@@ -6,7 +6,14 @@
 namespace lucore::detail {
 
 	OsLibraryHandle OsOpenLibrary(const char* filename) {
-		return reinterpret_cast<OsLibraryHandle>(GetModuleHandleA(filename);
+		return reinterpret_cast<OsLibraryHandle>(LoadLibraryA(filename));
+	}
+
+	OsLibraryHandle OsOpenExistingLibrary(const char* filename) {
+		if(!OsLibraryLoaded(filename))
+			return nullptr;
+
+		return reinterpret_cast<OsLibraryHandle>(GetModuleHandleA(filename));
 	}
 
 	bool OsLibraryLoaded(const char* filename) {
@@ -18,8 +25,11 @@ namespace lucore::detail {
 	}
 
 	void OsFreeLibrary(OsLibraryHandle handle) {
-		// GetModuleHandle*() does not increment the reference count;
-		// therefore, we have nothing to do here on Windows.
+		// Note that this function should never be called on a handle retrieved
+		// from OsOpenExistingLibrary(); GetModuleHandle() does **not** increment
+		// the module's reference count and therefore there is a real risk of accidentally
+		// freeing the module and causing crashes 
+		FreeLibraryA(reinterpret_cast<HMODULE>(handle));
 	}
 
 } // namespace lucore::detail

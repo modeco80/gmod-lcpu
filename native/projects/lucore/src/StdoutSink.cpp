@@ -8,7 +8,7 @@ namespace lucore {
 
 	void StdoutSink::OutputMessage(const Logger::MessageData& data) {
 		// This is kinda iffy, but required until more standard libraries support the C++23 <print>
-		// header.
+		// header (or C++23 in general, but that's a different can of worms.)
 		struct FputcIterator {
 			using iterator_category = std::output_iterator_tag;
 			using value_type = void;

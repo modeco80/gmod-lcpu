@@ -2,6 +2,7 @@
 
 #include <lucore/Logger.hpp>
 
+#include "GarrysMod/Lua/LuaBase.h"
 #include "LuaDevice.hpp"
 
 namespace lcpu {
@@ -56,6 +57,21 @@ namespace lcpu {
 	void LuaCpu::RegisterClass(GarrysMod::Lua::ILuaBase* LUA) {
 		RegisterClassStart(LUA);
 
+		RegisterGetter("CycleCount", [](GarrysMod::Lua::ILuaBase* LUA) {
+			auto self = FromLua(LUA, 1);
+			LUA->PushNumber(self->system->cpu->GetCycleCount());
+		});
+
+		RegisterSetter("CycleCount", [](GarrysMod::Lua::ILuaBase* LUA) {
+			auto self = FromLua(LUA, 1);
+
+			auto newValue = static_cast<u32>(LUA->GetNumber(-1));
+			if(newValue == 0) {
+				LUA->ThrowError("Invalid value to set LuaCpu:CycleCount");
+			}
+			self->system->cpu->SetCycleCount(newValue);
+		});
+
 		RegisterMethod("PoweredOn", PoweredOn);
 		RegisterMethod("Cycle", Cycle);
 		RegisterMethod("PowerOff", PowerOff);
@@ -67,9 +83,7 @@ namespace lcpu {
 	LuaCpu::LuaCpu(u32 memorySize) {
 		poweredOn = true;
 		system = riscv::System::Create(memorySize);
-		system->OnPowerOff = [&]() {
-			poweredOn = false;
-		};
+		system->OnPowerOff = [&]() { poweredOn = false; };
 
 		// lame test code. this WILL be removed, I just want this for a quick test
 		auto fp = std::fopen("/home/lily/test-gmod.bin", "rb");

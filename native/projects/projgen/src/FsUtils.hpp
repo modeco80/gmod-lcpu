@@ -10,11 +10,17 @@
 namespace fs = std::filesystem;
 
 namespace projgen::util {
+	struct FCloseDeleter {
+		void operator()(std::FILE* file) {
+			if(file)
+				std::fclose(file);
+		}
+	};
 
-	using UniqueFilePtr = std::unique_ptr<std::FILE, decltype(&std::fclose)>;
+	using UniqueFilePtr = std::unique_ptr<std::FILE, FCloseDeleter>;
 
 	inline UniqueFilePtr UniqueFopen(std::string_view path, std::string_view mode) {
-		return UniqueFilePtr(std::fopen(path.data(), mode.data()), &std::fclose);
+		return UniqueFilePtr(std::fopen(path.data(), mode.data()));
 	}
 
 	inline std::string ReadFileAsString(const fs::path& path) {

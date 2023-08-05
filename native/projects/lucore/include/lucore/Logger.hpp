@@ -15,9 +15,15 @@ namespace lucore {
 
 		static constexpr std::string_view SeverityToString(MessageSeverity sev) {
 			// This must match order of Logger::MessageSeverity.
-			const char* MessageSeverityStringTable[] = { "Deb", "Inf", "Wrn", "Err", "Ftl" };
+			const char* MessageSeverityStringTable[] = { "Debug", "Info", "Warn", "Error", "Fatal" };
 			return MessageSeverityStringTable[static_cast<std::size_t>(sev)];
 		}
+
+		struct MessageDataUnformatted {
+			std::chrono::system_clock::time_point time;
+			MessageSeverity severity;
+			std::string_view message;
+		};
 
 		/// Message data. This is only used by logger sinks.
 		struct MessageData {
@@ -33,7 +39,8 @@ namespace lucore {
 			virtual void OutputMessage(const MessageData& data) = 0;
 		};
 
-		/// Get the single instance of the logger.
+		/// Get the common instance of the logger.
+		/// LogInfo() etc operates on this function only.
 		static Logger& The();
 
 		Logger(const Logger&) = delete;
@@ -49,6 +56,15 @@ namespace lucore {
 
 		/// Set the current log level.
 		void SetLogLevel(MessageSeverity newLogLevel) { logLevel = newLogLevel; }
+
+		// TODO: sinks should get a "unformatted output" OutputMessage overload
+#if 0
+		constexpr void Debug(std::string_view message) { VOut(MessageSeverity::Debug, message); }
+		constexpr void Info(std::string_view message) { VOut(MessageSeverity::Info, message); }
+		constexpr void Warning(std::string_view message) { VOut(MessageSeverity::Warning, message); }
+		constexpr void Error(std::string_view message) { VOut(MessageSeverity::Error, message); }
+		constexpr void Fatal(std::string_view message) { VOut(MessageSeverity::Fatal, message); }
+#endif
 
 		template <class... Args>
 		inline void Debug(std::string_view fmt, Args... args) {

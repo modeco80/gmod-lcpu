@@ -16,6 +16,25 @@ namespace lucore {
 		}
 	} // namespace
 
+	Unique<Library> Library::Open(std::string_view dllname) {
+		auto name = FormatLibraryName(dllname);
+		auto handle = detail::OsOpenLibrary(name.c_str());
+
+		if(!handle) {
+#ifndef _WIN32
+			// Try without a `lib` prefix next. If this fails, give up.
+			name = std::format("{}.so", dllname);
+			handle = detail::OsOpenLibrary(name.c_str());
+			if(!handle)
+				return nullptr;
+#else
+			return nullptr;
+#endif
+		}
+
+		return Unique<Library>(new Library(handle));
+	}
+
 	Unique<Library> Library::OpenExisting(std::string_view dllname) {
 		auto name = FormatLibraryName(dllname);
 		if(!detail::OsLibraryLoaded(name.c_str())) {
@@ -29,7 +48,7 @@ namespace lucore {
 #endif
 		}
 
-		return Unique<Library>(new Library(detail::OsOpenLibrary(name.c_str())));
+		return Unique<Library>(new Library(detail::OsOpenExistingLibrary(name.c_str()), Existing));
 	}
 
 	bool Library::Loaded(std::string_view dllname) {
@@ -38,7 +57,11 @@ namespace lucore {
 
 	Library::~Library() {
 		if(handle) {
-			detail::OsFreeLibrary(handle);
+			// See OsLibrary.win32.cpp for reasoning of this weird ifdef thing
+#ifdef _WIN32
+			if(!existing)
+#endif
+				detail::OsFreeLibrary(handle);
 		}
 	}
 

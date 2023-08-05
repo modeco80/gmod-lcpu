@@ -1,4 +1,4 @@
-//! Operating-system independent utilities for opening
+//! Operating-system independent API for opening
 //! shared libraries. This is currently a detail-only
 //! Lucore API, and its stability is NOT guaranteed.
 
@@ -6,8 +6,10 @@ namespace lucore::detail {
 	/// Opaque handle type for libraries.
 	using OsLibraryHandle = void*;
 
-	/// Open a library.
 	OsLibraryHandle OsOpenLibrary(const char* filename);
+
+	/// Open a library.
+	OsLibraryHandle OsOpenExistingLibrary(const char* filename);
 
 	/// Query if the library with the given [filename] is loaded.
 	bool OsLibraryLoaded(const char* filename);

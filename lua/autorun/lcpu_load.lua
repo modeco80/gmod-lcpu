@@ -15,6 +15,8 @@ if SERVER then
 	-- Uncomment this to enable debug logging (useful for troubleshooting bugs)
 	--LCPUNative.EnableDebug()
 
+	include("lcpu/cvars.lua")
+
 	AddCSLuaFile("entities/gmod_lcpu_cpu.lua")
 
 	-- Serverside devices (that don't depend on wiremod being loaded)
