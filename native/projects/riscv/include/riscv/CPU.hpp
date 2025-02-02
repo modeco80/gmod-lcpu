@@ -24,10 +24,10 @@ namespace riscv {
 			extraflags |= 3; // Start in Machine mode
 		}
 
-		constexpr u32 GetCycleCount() { return cycleCount; }
-		constexpr void SetCycleCount(u32 value) {
+		constexpr u32 GetInstructionCount() { return instructionCount; }
+		constexpr void SetInstructionCount(u32 value) {
 			LUCORE_ASSERT(value != 0, "no <3");
-			cycleCount = value;
+			instructionCount = value;
 		}
 
 		// TODO: Handlers for CSR read/write (if we need it?)
@@ -54,7 +54,7 @@ namespace riscv {
 		u32 extraflags {};
 
 	   private:
-		u32 cycleCount { 1024 };
+		u32 instructionCount { 1024 };
 
 		/// Set by [CPU::Trap] to tell the CPU it was trapped.
 		bool trapped { false };

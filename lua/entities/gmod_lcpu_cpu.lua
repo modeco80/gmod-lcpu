@@ -9,7 +9,6 @@ if CLIENT then return end
 -- (hacky, but /shrug)
 include("lcpu/devices/wire_interface.lua")
 
--- TODO: serverside convars to control execution rate & cycle count
 function ENT:Initialize()
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
@@ -24,20 +23,20 @@ function ENT:Initialize()
 end
 
 function ENT:Think()
-	-- Avoid running if the cpu is not powered on
 	if not self.cpu:PoweredOn() then return end
 
-	if LCPU.cycleCount ~= self.cpu.CycleCount then
-		--print(string.format("bumping up cycle count to %d", LCPU.cycleCount));
-		self.cpu.CycleCount = LCPU.cycleCount
+	-- update instructions per tick if it changed
+	if LCPU.cycleCount ~= self.cpu.InstructionsPerTick then
+		self.cpu.InstructionsPerTick = LCPU.cycleCount
 	end
 
+	-- Run for the amount of ticks
 	for i = 1, LCPU.tickCount do
 		self.cpu:Cycle()
 	end
 	
-	-- Even though this is gated by tickrate I'm just trying to be nice here
-	self:NextThink(CurTime() + 0.1)
+	-- this is gated by tickrate
+	self:NextThink(CurTime())
 end
 
 function ENT:Reset()
@@ -46,5 +45,5 @@ end
 
 function ENT:PowerOn()
 	self.cpu:PowerOn()
-	self:NextThink(CurTime() + 0.1)
+	self:NextThink(CurTime())
 end

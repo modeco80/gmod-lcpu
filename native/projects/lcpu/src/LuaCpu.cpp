@@ -57,19 +57,19 @@ namespace lcpu {
 	void LuaCpu::RegisterClass(GarrysMod::Lua::ILuaBase* LUA) {
 		RegisterClassStart(LUA);
 
-		RegisterGetter("CycleCount", [](GarrysMod::Lua::ILuaBase* LUA) {
+		RegisterGetter("InstructionsPerTick", [](GarrysMod::Lua::ILuaBase* LUA) {
 			auto self = FromLua(LUA, 1);
-			LUA->PushNumber(self->system->cpu->GetCycleCount());
+			LUA->PushNumber(self->system->cpu->GetInstructionCount());
 		});
 
-		RegisterSetter("CycleCount", [](GarrysMod::Lua::ILuaBase* LUA) {
+		RegisterSetter("InstructionsPerTick", [](GarrysMod::Lua::ILuaBase* LUA) {
 			auto self = FromLua(LUA, 1);
 
 			auto newValue = static_cast<u32>(LUA->GetNumber(-1));
 			if(newValue == 0) {
-				LUA->ThrowError("Invalid value to set LuaCpu:CycleCount");
+				LUA->ThrowError("Invalid value to set LuaCpu:InstructionsPerTick");
 			}
-			self->system->cpu->SetCycleCount(newValue);
+			self->system->cpu->SetInstructionCount(newValue);
 		});
 
 		RegisterMethod("PoweredOn", PoweredOn);

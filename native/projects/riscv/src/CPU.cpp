@@ -7,7 +7,7 @@
 namespace riscv {
 
 	void CPU::Clock() {
-		Step(cycleCount);
+		Step(instructionCount);
 	}
 
 	void CPU::Trap(u32 trapCode) {

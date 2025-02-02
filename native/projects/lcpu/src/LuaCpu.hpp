@@ -6,7 +6,7 @@
 
 namespace lcpu {
 	/// Binding of [riscv::System] to Lua.
-	struct LuaCpu : public lua::LuaObject<LuaCpu> {
+	struct LuaCpu final : public lua::LuaObject<LuaCpu> {
 		/// Lua binding stuff
 		constexpr static const char* Name() { return "LuaCpu"; }
 		static void RegisterClass(GarrysMod::Lua::ILuaBase* LUA);
