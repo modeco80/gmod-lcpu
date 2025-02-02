@@ -68,27 +68,27 @@ namespace lucore {
 
 		template <class... Args>
 		inline void Debug(std::string_view fmt, Args... args) {
-			VOut(MessageSeverity::Debug, fmt, std::make_format_args(std::forward<Args>(args)...));
+			VOut(MessageSeverity::Debug, fmt, std::make_format_args(args...));
 		}
 
 		template <class... Args>
 		inline void Info(std::string_view fmt, Args... args) {
-			VOut(MessageSeverity::Info, fmt, std::make_format_args(std::forward<Args>(args)...));
+			VOut(MessageSeverity::Info, fmt, std::make_format_args(args...));
 		}
 
 		template <class... Args>
 		inline void Warning(std::string_view fmt, Args... args) {
-			VOut(MessageSeverity::Warning, fmt, std::make_format_args(std::forward<Args>(args)...));
+			VOut(MessageSeverity::Warning, fmt, std::make_format_args(args...));
 		}
 
 		template <class... Args>
 		inline void Error(std::string_view fmt, Args... args) {
-			VOut(MessageSeverity::Error, fmt, std::make_format_args(std::forward<Args>(args)...));
+			VOut(MessageSeverity::Error, fmt, std::make_format_args(args...));
 		}
 
 		template <class... Args>
 		inline void Fatal(std::string_view fmt, Args... args) {
-			VOut(MessageSeverity::Fatal, fmt, std::make_format_args(std::forward<Args>(args)...));
+			VOut(MessageSeverity::Fatal, fmt, std::make_format_args(args...));
 		}
 
 	   private:
@@ -101,27 +101,27 @@ namespace lucore {
 
 	template <class... Args>
 	constexpr void LogDebug(std::string_view format, Args... args) {
-		Logger::The().Debug(format, std::forward<Args>(args)...);
+		Logger::The().Debug(format, args...);
 	}
 
 	template <class... Args>
 	constexpr void LogInfo(std::string_view format, Args... args) {
-		Logger::The().Info(format, std::forward<Args>(args)...);
+		Logger::The().Info(format, args...);
 	}
 
 	template <class... Args>
 	constexpr void LogWarning(std::string_view format, Args... args) {
-		Logger::The().Warning(format, std::forward<Args>(args)...);
+		Logger::The().Warning(format, args...);
 	}
 
 	template <class... Args>
 	constexpr void LogError(std::string_view format, Args... args) {
-		Logger::The().Error(format, std::forward<Args>(args)...);
+		Logger::The().Error(format, args...);
 	}
 
 	template <class... Args>
 	constexpr void LogFatal(std::string_view format, Args... args) {
-		Logger::The().Fatal(format, std::forward<Args>(args)...);
+		Logger::The().Fatal(format, args...);
 	}
 
 } // namespace lucore
